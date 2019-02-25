@@ -1,9 +1,11 @@
 import {
   IntegrationExecutionContext,
-  IntegrationInvocationEvent
+  IntegrationInvocationEvent,
 } from "@jupiterone/jupiter-managed-integration-sdk";
 
-/**
+import { fetchProviderInfo } from "./provider";
+
+/* *
  * Performs validation of the execution before the execution handler function is
  * invoked.
  *
@@ -15,15 +17,11 @@ import {
  * @param executionContext
  */
 export default async function invocationValidator(
-  executionContext: IntegrationExecutionContext<IntegrationInvocationEvent>
+  executionContext: IntegrationExecutionContext<IntegrationInvocationEvent>,
 ) {
   // const { config } = executionContext.instance;
-  // if (!config.providerAPIKey) {
-  //   throw new IntegrationInstanceConfigError('providerAPIKey missing in config');
-  // }
-  // try {
-  //   new ProviderClient(config.providerAPIKey).someEndpoint();
-  // } catch (err) {
-  //   throw new IntegrationInstanceAuthenticationError(err);
-  // }
+
+  fetchProviderInfo().catch(error => {
+    throw new Error(`${error}: validating provider connection`);
+  });
 }

@@ -4,3 +4,4 @@ coverage/
 dist/
 jupiterone-jupiter-managed-integration-sdk-*
 yarn-error.log
+.vscode
