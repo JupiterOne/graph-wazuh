@@ -1,17 +1,27 @@
+/* tslint:disable:no-console */
 import {
   createLocalInvocationEvent,
-  executeSingleHandlerLocal
+  executeSingleHandlerLocal,
 } from "@jupiterone/jupiter-managed-integration-sdk";
 import { createLogger, TRACE } from "bunyan";
 import { executionHandler } from "../src/index";
+import { ProviderConfig} from "../src/provider";
 
 async function run(): Promise<void> {
   const logger = createLogger({ name: "local", level: TRACE });
 
-  // TODO Populate for authentication as a Google Service Account
-  // See https://developers.google.com/identity/protocols/OAuth2ServiceAccount
-  const integrationConfig = {
-    // providerApiToken: process.env.PROVIDER_LOCAL_EXECUTION_API_TOKEN
+  if (!process.env.WAZUH_API_USER_CONFIG
+  ||  !process.env.WAZUH_API_SECRET_CONFIG
+  ||  !process.env.WAZUH_API_HOST_CONFIG
+  ||  !process.env.WAZUH_API_PROTOCAL_CONFIG) {
+    throw new Error("Local execution requires the WAZUH CONFIG variables be set");
+  }
+
+  const integrationConfig: ProviderConfig = {
+    userId: process.env.WAZUH_API_USER_CONFIG,
+    secret: process.env.WAZUH_API_SECRET_CONFIG,
+    baseUrlHost: process.env.WAZUH_API_HOST_CONFIG,
+    baseUrlProtocal: process.env.WAZUH_API_PROTOCAL_CONFIG
   };
 
   logger.info(
@@ -19,9 +29,10 @@ async function run(): Promise<void> {
       integrationConfig,
       logger,
       executionHandler,
-      createLocalInvocationEvent()
+      // invocationArgs,
+      createLocalInvocationEvent(),
     ),
-    "Execution completed successfully!"
+    "Execution completed successfully!",
   );
 }
 

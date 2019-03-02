@@ -2,8 +2,7 @@ import {
   IntegrationExecutionContext,
   IntegrationInvocationEvent,
 } from "@jupiterone/jupiter-managed-integration-sdk";
-
-import { fetchProviderInfo } from "./provider";
+import initializeContext from "./initializeContext";
 
 /* *
  * Performs validation of the execution before the execution handler function is
@@ -19,9 +18,9 @@ import { fetchProviderInfo } from "./provider";
 export default async function invocationValidator(
   executionContext: IntegrationExecutionContext<IntegrationInvocationEvent>,
 ) {
-  // const { config } = executionContext.instance;
+  const wazuhExectionContext = initializeContext(executionContext);
 
-  fetchProviderInfo().catch(error => {
+  wazuhExectionContext.provider.fetchManagerInfo().catch(error => {
     throw new Error(`${error}: validating provider connection`);
   });
 }

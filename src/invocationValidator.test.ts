@@ -1,5 +1,6 @@
 import invocationValidator from "./invocationValidator";
+import { createTestIntegrationExecutionContext } from '@jupiterone/jupiter-managed-integration-sdk';
 
-test("should be implemented to validation invocation", async () => {
-  await invocationValidator({} as any);
+test("Provider Validation invocation", async () => {
+  await invocationValidator(createTestIntegrationExecutionContext() );
 });

@@ -1,113 +1,155 @@
-// import faker from 'faker';
-// const faker = require('faker');
-// faker.locale = 'en_US';
-
 require("isomorphic-fetch");
 
-// Configuration  TODO
-const base_url = "http://user:password@PLACE-SERVERLOCATION-HERE:55000";
-
 export interface WazuhManager {
-  msg: string;
-  api_version: string;
-  hostname: string;
-  timestamp: string;
   id: string;
+  compilationDate: string;
+  version: string;
+  opensslSupport: string;
+  maxAgents: string;
+  rulesetVersion: string;
+  path: string;
+  tzName: string;
+  type: string;
+  tzOffset: string;
 }
 
 export interface Agent {
   status: string;
   name: string;
   ip: string;
-  manager: string;
-  node_name: string;
+  manager?: string;
+  nodeName: string;
   dateAdd: string;
-  version: string;
-  lastKeepAlive: string;
-  // os: {
-  // os_major: string,
-  // os_name: string,
-  // os_uname: string,
-  // os_platform: string,
-  // os_version: string,
-  // os_codename: string,
-  // os_arch: string,
-  // },
+  version?: string;
+  lastKeepAlive?: string;
+  osMajor: string;
+  osName: string;
+  osUname: string;
+  osPlatform: string;
+  osVersion: string;
+  osCodename: string;
+  osArch: string;
+  osMinor: string;
   id: string;
   ownerId: string;
 }
 
-export async function fetchProviderInfo(): Promise<string> {
-  return await fetch(base_url)
-    .then((response: Response) => {
-      return response.json();
-    })
-    .then(data => {
-      return JSON.stringify(data);
-    })
-    .catch(error => {
-      throw new Error(`${error}: fetching provider info`);
-    });
+export interface ProviderConfig {
+  userId: string;
+  secret: string;
+  baseUrlProtocal: string;
+  baseUrlHost: string;
 }
 
-export async function fetchManager(): Promise<WazuhManager> {
-  return await fetchProviderInfo()
-    .then(info => {
-      const provider = JSON.parse(info);
-      return {
-        msg: provider.msg,
-        api_version: provider.api_version,
-        hostname: provider.hostname,
-        timestamp: provider.timestamp,
-        id: "0",
-      };
-    })
-    .catch(error => {
-      throw new Error(`${error}: fetching wazuh manager info `);
-    });
-}
+export class ProviderClient {
+  private manager_Url: string;
+  private agent_Url: string;
 
-export default async function fetchAgentsInfo(): Promise<string> {
-  return await fetch(base_url + "/agents/000")
-    .then((response: Response) => {
-      return response.json();
-    })
-    .then(data => {
-      return data;
-    })
-    .catch(error => {
-      throw new Error(`${error}: fetching agents`);
-    });
-}
-
-export function mapToAgent(a: string): Agent {
-  const agent = JSON.parse(JSON.stringify(a));
-  return {
-    status: agent.status,
-    name: agent.name,
-    ip: agent.ip,
-    manager: agent.manager,
-    node_name: agent.node_name,
-    dateAdd: agent.dateAdd,
-    version: agent.version,
-    lastKeepAlive: agent.lastKeepAlive,
-    id: agent.id,
-    ownerId: "0",
-  };
-}
-
-export async function fetchAgents(): Promise<Agent[]> {
-  const info = await fetchAgentsInfo().catch(error => {
-    throw new Error(`${error}: fetching agents`);
-  });
-
-  const agents = JSON.parse(JSON.stringify(info));
-
-  if (Array.isArray(agents)) {
-    return agents.map(agent => {
-      return mapToAgent(agent);
-    });
-  } else {
-    return [mapToAgent(agents)];
+  constructor(_providerConfig: ProviderConfig) {
+    if (
+      _providerConfig.userId === undefined ||
+      _providerConfig.userId === undefined ||
+      _providerConfig.userId === "" ||
+      _providerConfig.userId === ""
+    ) {
+      throw new Error("User ID and Password required");
+    } else {
+      this.manager_Url = `${_providerConfig.baseUrlProtocal}${
+        _providerConfig.userId
+      }:${_providerConfig.secret}@${_providerConfig.baseUrlHost}/manager/info`;
+      this.agent_Url = `${_providerConfig.baseUrlProtocal}${
+        _providerConfig.userId
+      }:${_providerConfig.secret}@${_providerConfig.baseUrlHost}/agents`;
+      console.log(this.manager_Url);
+      console.log(this.agent_Url);
+    }
   }
-}
+
+  public async fetchManagerInfo(): Promise<string> {
+    return await fetch(this.manager_Url)
+      .then((response: Response) => {
+        return response.json();
+      })
+      .then(data => {
+        return JSON.stringify(data);
+      })
+      .catch(error => {
+        throw new Error(`${error}: fetching provider info`);
+      });
+  }
+
+  public async fetchManager(): Promise<WazuhManager> {
+    return await this.fetchManagerInfo()
+      .then(info => {
+        const provider = JSON.parse(info);
+        return {
+          compilationDate: provider.data.compilation_date,
+          version: provider.data.version,
+          opensslSupport: provider.data.openssl_support,
+          maxAgents: provider.data.max_agents,
+          rulesetVersion: provider.data.ruleset_version,
+          path: provider.data.path,
+          tzName: provider.data.tz_name,
+          type: provider.data.type,
+          tzOffset: provider.data.tz_offset,
+          id: "0"
+        };
+      })
+      .catch(error => {
+        throw new Error(`${error}: fetching wazuh manager info `);
+      });
+  }
+
+  public async fetchAgentsInfo(): Promise<string> {
+    return await fetch(this.agent_Url)
+      .then((response: Response) => {
+        return response.json();
+      })
+      .then(data => {
+        return data;
+      })
+      .catch(error => {
+        throw new Error(`${error}: fetching agents`);
+      });
+  }
+
+  private mapToAgent(a: string): Agent {
+    const agent = JSON.parse(JSON.stringify(a));
+    
+    return { 
+      status: agent.status,
+      name: agent.name,
+      ip: agent.ip,
+      manager: agent.manager !== undefined ? agent.manager : "",
+      nodeName: agent.node_name,
+      dateAdd: agent.dateAdd,
+      version: agent.version !== undefined ? agent.version : "",
+      lastKeepAlive: agent.lastKeepAlive !== undefined ? agent.lastKeepAlive : "",
+      osMajor: agent.os !== undefined && agent.os.major !== undefined ? agent.os.major : "",
+      osName: agent.os !== undefined && agent.os.name !== undefined ? agent.os.name : "",
+      osUname: agent.os !== undefined  && agent.os.uname !== undefined ? agent.os.uname : "",
+      osPlatform: agent.os !== undefined  && agent.os.platform !== undefined ? agent.os.platform : "",
+      osVersion: agent.os !== undefined  && agent.os.version !== undefined ? agent.os.version : "",
+      osCodename: agent.os !== undefined  && agent.os.codename !== undefined ? agent.os.codename : "",
+      osArch: agent.os !== undefined  && agent.os.arch !== undefined ? agent.os.arch : "",
+      osMinor: agent.os !== undefined  && agent.os.minor !== undefined ? agent.os.minor : "",
+      id: agent.id,
+      ownerId: "0"
+    };
+  }
+
+  public async fetchAgents(): Promise<Agent[]> {
+    return (await this.fetchAgentsInfo()
+      .then(info => {
+        const agentInfo = JSON.parse(JSON.stringify(info));
+        const agents = [];
+        for (const agent of agentInfo.data.items) {
+          agents.push(this.mapToAgent(agent));
+        }
+        return agents;
+      })
+      .catch(error => {
+        throw new Error(`${error}: fetching agents`);
+      }));
+  }
+} // end of class

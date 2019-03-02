@@ -15,8 +15,7 @@ connect to provider APIs. An integration is triggered by an event containing the
 instance configuration. `IntegrationInstance.config` is encrypted at rest and
 decrypted before it is delivered to the integration execution handler.
 
-Local execution of the integration is started through `execute.ts` (`yarn
-start`), which may be changed to load development credentials into the
+Local execution of the integration is started through `execute.ts` (`yarn start`), which may be changed to load development credentials into the
 `IntegrationInstance.config`. Use environment variables to avoid publishing
 sensitive information to GitHub!
 
@@ -53,7 +52,12 @@ with no existing data:
 
 ### Environment Variables
 
-* `GRAPH_DB_ENDPOINT` - `"localhost"`
+- `GRAPH_DB_ENDPOINT` - `"localhost"`
+
+WAZUH_API_USER_CONFIG=`user ID`
+WAZUH_API_SECRET_CONFIG=`pass word`
+WAZUH_API_HOST_CONFIG=`Server Host URL`:55000
+WAZUH_API_PROTOCAL_CONFIG=`http://`
 
 ### Running tests
 
