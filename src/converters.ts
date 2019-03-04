@@ -1,6 +1,6 @@
 import {
   EntityFromIntegration,
-  RelationshipFromIntegration,
+  RelationshipFromIntegration
 } from "@jupiterone/jupiter-managed-integration-sdk";
 import { Agent, WazuhManager } from "./provider";
 
@@ -21,7 +21,9 @@ export const WAZUH_MANAGER_AGENT_RELATIONSHIP_TYPE =
   "provider_wazuhmanager_agent";
 export const WAZUH_MANAGER_AGENT_RELATIONSHIP_CLASS = "HAS";
 
-export interface WazuhManagerEntity extends EntityFromIntegration, WazuhManager {
+export interface WazuhManagerEntity
+  extends EntityFromIntegration,
+    WazuhManager {
   managerId: string;
 }
 
@@ -30,10 +32,10 @@ export interface AgentEntity extends EntityFromIntegration, Agent {
 }
 
 export function createWazuhManagerEntities(
-  data: WazuhManager,
+  data: WazuhManager
 ): WazuhManagerEntity {
   // Note the manager is also the account entity
-  return ({
+  return {
     _key: `${WAZUH_MANAGER_ENTITY_TYPE}-${data.id}`,
     _type: WAZUH_MANAGER_ENTITY_TYPE,
     _class: [WAZUH_MANAGER_ENTITY_CLASS, ACCOUNT_ENTITY_CLASS],
@@ -49,7 +51,7 @@ export function createWazuhManagerEntities(
     tzName: data.tzName,
     type: data.type,
     tzOffset: data.tzOffset
-  });
+  };
 }
 
 export function createAgentEntities(data: Agent[]): AgentEntity[] {
@@ -77,13 +79,12 @@ export function createAgentEntities(data: Agent[]): AgentEntity[] {
     osArch: d.osArch,
     osMinor: d.osMinor,
     id: d.id
-  
   }));
 }
 
 export function createWazuhManagerAgentRelationships(
   manager: WazuhManagerEntity,
-  agents: AgentEntity[],
+  agents: AgentEntity[]
 ) {
   const relationships = [];
   for (const agent of agents) {
@@ -96,13 +97,13 @@ export function createWazuhManagerAgentRelationships(
 
 function createWazuhManagerAgentRelationship(
   manager: WazuhManagerEntity,
-  agent: AgentEntity,
+  agent: AgentEntity
 ): RelationshipFromIntegration {
   return {
     _key: `${manager._key}_has_${agent._key}`,
     _type: WAZUH_MANAGER_AGENT_RELATIONSHIP_TYPE,
     _class: WAZUH_MANAGER_AGENT_RELATIONSHIP_CLASS,
     _fromEntityKey: manager._key,
-    _toEntityKey: agent._key,
+    _toEntityKey: agent._key
   };
 }

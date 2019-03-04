@@ -1,8 +1,8 @@
 import {
-  IntegrationExecutionContext,
-  IntegrationInvocationEvent,
-  // EntityFromIntegration,
   GraphClient,
+  IntegrationExecutionContext,
+  // EntityFromIntegration,
+  IntegrationInvocationEvent,
   PersisterClient
 } from "@jupiterone/jupiter-managed-integration-sdk";
 import { ProviderClient, ProviderConfig } from "./provider";
@@ -15,18 +15,18 @@ export interface WazuhExecutionContext
 }
 
 export default function initializeContext(
-  context: IntegrationExecutionContext<IntegrationInvocationEvent>,
+  context: IntegrationExecutionContext<IntegrationInvocationEvent>
 ): WazuhExecutionContext {
-
   let providerConfig: ProviderConfig = {
     userId: context.instance.config.userId,
     secret: context.instance.config.secret,
-    baseUrlProtocal: context.instance.config.baseUrlProtocal, 
-    baseUrlHost: context.instance.config.baseUrlHost};
+    baseUrlProtocal: context.instance.config.baseUrlProtocal,
+    baseUrlHost: context.instance.config.baseUrlHost
+  };
 
   return {
     ...context,
     ...context.clients.getClients(),
-    provider: new ProviderClient(providerConfig),
+    provider: new ProviderClient(providerConfig)
   };
 }

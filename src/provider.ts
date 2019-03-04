@@ -115,8 +115,8 @@ export class ProviderClient {
 
   private mapToAgent(a: string): Agent {
     const agent = JSON.parse(JSON.stringify(a));
-    
-    return { 
+
+    return {
       status: agent.status,
       name: agent.name,
       ip: agent.ip,
@@ -124,22 +124,47 @@ export class ProviderClient {
       nodeName: agent.node_name,
       dateAdd: agent.dateAdd,
       version: agent.version !== undefined ? agent.version : "",
-      lastKeepAlive: agent.lastKeepAlive !== undefined ? agent.lastKeepAlive : "",
-      osMajor: agent.os !== undefined && agent.os.major !== undefined ? agent.os.major : "",
-      osName: agent.os !== undefined && agent.os.name !== undefined ? agent.os.name : "",
-      osUname: agent.os !== undefined  && agent.os.uname !== undefined ? agent.os.uname : "",
-      osPlatform: agent.os !== undefined  && agent.os.platform !== undefined ? agent.os.platform : "",
-      osVersion: agent.os !== undefined  && agent.os.version !== undefined ? agent.os.version : "",
-      osCodename: agent.os !== undefined  && agent.os.codename !== undefined ? agent.os.codename : "",
-      osArch: agent.os !== undefined  && agent.os.arch !== undefined ? agent.os.arch : "",
-      osMinor: agent.os !== undefined  && agent.os.minor !== undefined ? agent.os.minor : "",
+      lastKeepAlive:
+        agent.lastKeepAlive !== undefined ? agent.lastKeepAlive : "",
+      osMajor:
+        agent.os !== undefined && agent.os.major !== undefined
+          ? agent.os.major
+          : "",
+      osName:
+        agent.os !== undefined && agent.os.name !== undefined
+          ? agent.os.name
+          : "",
+      osUname:
+        agent.os !== undefined && agent.os.uname !== undefined
+          ? agent.os.uname
+          : "",
+      osPlatform:
+        agent.os !== undefined && agent.os.platform !== undefined
+          ? agent.os.platform
+          : "",
+      osVersion:
+        agent.os !== undefined && agent.os.version !== undefined
+          ? agent.os.version
+          : "",
+      osCodename:
+        agent.os !== undefined && agent.os.codename !== undefined
+          ? agent.os.codename
+          : "",
+      osArch:
+        agent.os !== undefined && agent.os.arch !== undefined
+          ? agent.os.arch
+          : "",
+      osMinor:
+        agent.os !== undefined && agent.os.minor !== undefined
+          ? agent.os.minor
+          : "",
       id: agent.id,
       ownerId: "0"
     };
   }
 
   public async fetchAgents(): Promise<Agent[]> {
-    return (await this.fetchAgentsInfo()
+    return await this.fetchAgentsInfo()
       .then(info => {
         const agentInfo = JSON.parse(JSON.stringify(info));
         const agents = [];
@@ -150,6 +175,6 @@ export class ProviderClient {
       })
       .catch(error => {
         throw new Error(`${error}: fetching agents`);
-      }));
+      });
   }
 } // end of class

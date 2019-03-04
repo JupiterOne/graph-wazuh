@@ -1,43 +1,42 @@
 import {
   IntegrationExecutionContext,
   IntegrationExecutionResult,
-  IntegrationInvocationEvent,
+  IntegrationInvocationEvent
 } from "@jupiterone/jupiter-managed-integration-sdk";
 
 import {
+  AGENT_ENTITY_TYPE,
+  AgentEntity,
   createAgentEntities,
   createWazuhManagerAgentRelationships,
   createWazuhManagerEntities,
-  WAZUH_MANAGER_ENTITY_TYPE,
   WAZUH_MANAGER_AGENT_RELATIONSHIP_TYPE,
-  AGENT_ENTITY_TYPE,
-  WazuhManagerEntity,
-  AgentEntity
+  WAZUH_MANAGER_ENTITY_TYPE,
+  WazuhManagerEntity
 } from "./converters";
 
 import initializeContext from "./initializeContext";
 
-
 export default async function executionHandler(
-  context: IntegrationExecutionContext<IntegrationInvocationEvent>,
+  context: IntegrationExecutionContext<IntegrationInvocationEvent>
 ): Promise<IntegrationExecutionResult> {
-
   const { graph, persister, provider } = initializeContext(context);
 
   const [
     oldManagerEntities,
     oldAgentEntities,
-    oldManagerAgentRelationships,
+    oldManagerAgentRelationships
   ] = await Promise.all([
     graph.findEntitiesByType<WazuhManagerEntity>(WAZUH_MANAGER_ENTITY_TYPE),
     graph.findEntitiesByType<AgentEntity>(AGENT_ENTITY_TYPE),
     graph.findRelationshipsByType(WAZUH_MANAGER_AGENT_RELATIONSHIP_TYPE)
   ]);
 
-  const managerEntity: WazuhManagerEntity = await provider.fetchManager()
+  const managerEntity: WazuhManagerEntity = await provider
+    .fetchManager()
     .then(manager => {
       // Using the instance id based on the assumption that there is only one manager
-      manager.id = context.instance.id; 
+      manager.id = context.instance.id;
       manager.version = "44.4";
       return createWazuhManagerEntities(manager);
     })
@@ -46,7 +45,8 @@ export default async function executionHandler(
       throw new Error(`${error}`);
     });
 
-  const agentEntities: AgentEntity[] = await provider.fetchAgents()
+  const agentEntities: AgentEntity[] = await provider
+    .fetchAgents()
     .then(agents => {
       return createAgentEntities(agents);
     })
@@ -58,16 +58,15 @@ export default async function executionHandler(
   return {
     operations: await persister.publishPersisterOperations([
       [
-        ...persister.processEntities( oldManagerEntities, [managerEntity ]),
-        ...persister.processEntities( oldAgentEntities, agentEntities),
+        ...persister.processEntities(oldManagerEntities, [managerEntity]),
+        ...persister.processEntities(oldAgentEntities, agentEntities)
       ],
       [
         ...persister.processRelationships(
           oldManagerAgentRelationships,
-          createWazuhManagerAgentRelationships(managerEntity, agentEntities),
-        ),
-      ],
-    ]),
+          createWazuhManagerAgentRelationships(managerEntity, agentEntities)
+        )
+      ]
+    ])
   };
-
 }

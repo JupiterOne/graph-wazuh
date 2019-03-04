@@ -1,20 +1,24 @@
 /* tslint:disable:no-console */
 import {
   createLocalInvocationEvent,
-  executeSingleHandlerLocal,
+  executeSingleHandlerLocal
 } from "@jupiterone/jupiter-managed-integration-sdk";
 import { createLogger, TRACE } from "bunyan";
 import { executionHandler } from "../src/index";
-import { ProviderConfig} from "../src/provider";
+import { ProviderConfig } from "../src/provider";
 
 async function run(): Promise<void> {
   const logger = createLogger({ name: "local", level: TRACE });
 
-  if (!process.env.WAZUH_API_USER_CONFIG
-  ||  !process.env.WAZUH_API_SECRET_CONFIG
-  ||  !process.env.WAZUH_API_HOST_CONFIG
-  ||  !process.env.WAZUH_API_PROTOCAL_CONFIG) {
-    throw new Error("Local execution requires the WAZUH CONFIG variables be set");
+  if (
+    !process.env.WAZUH_API_USER_CONFIG ||
+    !process.env.WAZUH_API_SECRET_CONFIG ||
+    !process.env.WAZUH_API_HOST_CONFIG ||
+    !process.env.WAZUH_API_PROTOCAL_CONFIG
+  ) {
+    throw new Error(
+      "Local execution requires the WAZUH CONFIG variables be set"
+    );
   }
 
   const integrationConfig: ProviderConfig = {
@@ -30,9 +34,9 @@ async function run(): Promise<void> {
       logger,
       executionHandler,
       // invocationArgs,
-      createLocalInvocationEvent(),
+      createLocalInvocationEvent()
     ),
-    "Execution completed successfully!",
+    "Execution completed successfully!"
   );
 }
 

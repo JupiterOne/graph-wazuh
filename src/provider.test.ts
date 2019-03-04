@@ -5,7 +5,7 @@ const integrationConfig: ProviderConfig = {
   userId: process.env.WAZUH_API_USER_CONFIG,
   secret: process.env.WAZUH_API_SECRET_CONFIG,
   baseUrlHost: process.env.WAZUH_API_HOST_CONFIG,
-  baseUrlProtocal: process.env.WAZUH_API_PROTOCAL_CONFIG
+  baseUrlProtocal: process.env.WAZUH_API_PROTOCAL_CONFIG,
 };
 
 test("Wazuh Manager information and connection", async () => {
