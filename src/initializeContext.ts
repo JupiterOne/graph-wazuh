@@ -1,7 +1,6 @@
 import {
   GraphClient,
   IntegrationExecutionContext,
-  // EntityFromIntegration,
   IntegrationInvocationEvent,
   PersisterClient
 } from "@jupiterone/jupiter-managed-integration-sdk";
