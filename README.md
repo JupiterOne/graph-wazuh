@@ -58,7 +58,7 @@ with no existing data:
 - `WAZUH_API_PASSWORD`
 - `WAZUH_API_HOST`
 - `WAZUH_API_PORT`
-- `WAZUH_API_PROTOCAL_CONFIG`=`http://`
+- `WAZUH_API_SCHEME` - `"http"`
 
 ### Wazuh Environment
 
