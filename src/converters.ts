@@ -36,7 +36,7 @@ export function createWazuhManagerEntities(
   return {
     _key: `${WAZUH_MANAGER_ENTITY_TYPE}-${data.id}`,
     _type: WAZUH_MANAGER_ENTITY_TYPE,
-    _class: [WAZUH_MANAGER_ENTITY_CLASS, ACCOUNT_ENTITY_CLASS],
+    _class: WAZUH_MANAGER_ENTITY_CLASS,
     managerId: data.id,
     displayName: `${data.type} ${data.version}`,
     id: data.id,
