@@ -42,7 +42,7 @@ export interface ProviderConfig {
 }
 
 export class ProviderClient {
-  private manager_Url: string;
+  private managerUrl: string;
   private agent_Url: string;
 
   constructor(_providerConfig: ProviderConfig) {
