@@ -17,7 +17,7 @@ export const ACCOUNT_WAZUH_MANAGER_RELATIONSHIP_TYPE =
 export const ACCOUNT_WAZUH_MANAGER_RELATIONSHIP_CLASS = "HAS";
 
 export const WAZUH_MANAGER_AGENT_RELATIONSHIP_TYPE =
-  "provider_wazuhmanager_agent";
+  "wazuh_manager_agent";
 export const WAZUH_MANAGER_AGENT_RELATIONSHIP_CLASS = "HAS";
 
 export interface WazuhManagerEntity
