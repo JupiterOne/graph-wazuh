@@ -33,7 +33,6 @@ export interface AgentEntity extends EntityFromIntegration, Agent {
 export function createWazuhManagerEntities(
   data: WazuhManager
 ): WazuhManagerEntity {
-  // Note the manager is also the account entity
   return {
     _key: `${WAZUH_MANAGER_ENTITY_TYPE}-${data.id}`,
     _type: WAZUH_MANAGER_ENTITY_TYPE,
