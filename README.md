@@ -55,7 +55,7 @@ with no existing data:
 - `GRAPH_DB_ENDPOINT` - `"localhost"`
 
 - `WAZUH_API_USERNAME`
-- `WAZUH_API_SECRET_CONFIG`=`pass word`
+- `WAZUH_API_PASSWORD`
 - `WAZUH_API_HOST_CONFIG`=`Wazuh API Server Host`:55000
 - `WAZUH_API_PROTOCAL_CONFIG`=`http://`
 
