@@ -7,7 +7,7 @@ import { Agent, WazuhManager } from "./provider";
 export const ACCOUNT_ENTITY_CLASS = "Account";
 
 export const WAZUH_MANAGER_ENTITY_TYPE = "wazuh_manager";
-export const WAZUH_MANAGER_ENTITY_CLASS = "Wazuhmanager";
+export const WAZUH_MANAGER_ENTITY_CLASS = "Account";
 
 export const AGENT_ENTITY_TYPE = "provider_agent";
 export const AGENT_ENTITY_CLASS = "Agent";
