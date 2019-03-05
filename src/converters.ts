@@ -4,7 +4,6 @@ import {
 } from "@jupiterone/jupiter-managed-integration-sdk";
 import { Agent, WazuhManager } from "./provider";
 
-export const ACCOUNT_ENTITY_TYPE = "provider_account";
 export const ACCOUNT_ENTITY_CLASS = "Account";
 
 export const WAZUH_MANAGER_ENTITY_TYPE = "provider_wazuhmanager";
