@@ -43,7 +43,7 @@ export interface ProviderConfig {
 
 export class ProviderClient {
   private managerUrl: string;
-  private agent_Url: string;
+  private agentUrl: string;
 
   constructor(_providerConfig: ProviderConfig) {
     if (
