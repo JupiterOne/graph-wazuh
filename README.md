@@ -56,7 +56,8 @@ with no existing data:
 
 - `WAZUH_API_USERNAME`
 - `WAZUH_API_PASSWORD`
-- `WAZUH_API_HOST_CONFIG`=`Wazuh API Server Host`:55000
+- `WAZUH_API_HOST`
+- `WAZUH_API_PORT`
 - `WAZUH_API_PROTOCAL_CONFIG`=`http://`
 
 ### Wazuh Environment
