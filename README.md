@@ -15,7 +15,8 @@ connect to provider APIs. An integration is triggered by an event containing the
 instance configuration. `IntegrationInstance.config` is encrypted at rest and
 decrypted before it is delivered to the integration execution handler.
 
-Local execution of the integration is started through `execute.ts` (`yarn start`), which may be changed to load development credentials into the
+Local execution of the integration is started through `execute.ts`
+(`yarn start`), which may be changed to load development credentials into the
 `IntegrationInstance.config`. Use environment variables to avoid publishing
 sensitive information to GitHub!
 
@@ -26,9 +27,12 @@ provider. Developing an integration involves:
 
 1.  Establishing a secure connection to a provider API
 2.  Fetching provider data and converting it to entities and relationships
-3.  Collecting the existing set of entities and relationships already in the graph
-4.  Performing a diff to determine which entites/relationships to create/update/delete
-5.  Delivering create/update/delete operations to the persister to update the graph
+3.  Collecting the existing set of entities and relationships already in the
+    graph
+4.  Performing a diff to determine which entites/relationships to
+    create/update/delete
+5.  Delivering create/update/delete operations to the persister to update the
+    graph
 
 Run the integration to see what happens:
 
@@ -56,14 +60,19 @@ with no existing data:
 
 - `WAZUH_API_USERNAME`
 - `WAZUH_API_PASSWORD`
-- `WAZUH_API_HOST`
-- `WAZUH_API_PORT`
+- `WAZUH_API_HOST` - `"localhost"`
+- `WAZUH_API_PORT` - `"55000"`
 - `WAZUH_API_SCHEME` - `"http"`
+- `WAZUH_API_INTEGRATION` - `"0"`
 
 ### Wazuh Environment
 
-If you do not already have an existing Wazuh environment, you can build one by following these [instructions](https://documentation.wazuh.com/current/installation-guide/index.html).
+If you do not already have an existing Wazuh environment, you can build one by
+following these
+[instructions](https://documentation.wazuh.com/current/installation-guide/index.html).
 
+To perform integration tests with your Wazuh API server, set the
+`WAZUH_API_INTEGRATION=1` befor running tests.
 
 ### Running tests
 
