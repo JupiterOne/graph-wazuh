@@ -1,23 +1,16 @@
 import {
   EntityFromIntegration,
-  RelationshipFromIntegration
+  RelationshipFromIntegration,
 } from "@jupiterone/jupiter-managed-integration-sdk";
 import { Agent, WazuhManager } from "./provider";
 
-export const ACCOUNT_ENTITY_CLASS = "Account";
-
 export const WAZUH_MANAGER_ENTITY_TYPE = "wazuh_manager";
-export const WAZUH_MANAGER_ENTITY_CLASS = "Account";
+export const WAZUH_MANAGER_ENTITY_CLASS = ["Service", "Control"];
 
-export const AGENT_ENTITY_TYPE = "wazuh_host_agent";
+export const AGENT_ENTITY_TYPE = "wazuh_agent";
 export const AGENT_ENTITY_CLASS = "HostAgent";
 
-export const ACCOUNT_WAZUH_MANAGER_RELATIONSHIP_TYPE =
-  "provider_account_wazuhmanager";
-export const ACCOUNT_WAZUH_MANAGER_RELATIONSHIP_CLASS = "HAS";
-
-export const WAZUH_MANAGER_AGENT_RELATIONSHIP_TYPE =
-  "wazuh_manager_agent";
+export const WAZUH_MANAGER_AGENT_RELATIONSHIP_TYPE = "wazuh_manager_has_agent";
 export const WAZUH_MANAGER_AGENT_RELATIONSHIP_CLASS = "HAS";
 
 export interface WazuhManagerEntity
@@ -31,7 +24,7 @@ export interface AgentEntity extends EntityFromIntegration, Agent {
 }
 
 export function createWazuhManagerEntities(
-  data: WazuhManager
+  data: WazuhManager,
 ): WazuhManagerEntity {
   return {
     _key: `${WAZUH_MANAGER_ENTITY_TYPE}-${data.id}`,
@@ -48,7 +41,7 @@ export function createWazuhManagerEntities(
     path: data.path,
     tzName: data.tzName,
     type: data.type,
-    tzOffset: data.tzOffset
+    tzOffset: data.tzOffset,
   };
 }
 
@@ -76,13 +69,13 @@ export function createAgentEntities(data: Agent[]): AgentEntity[] {
     osCodename: d.osCodename,
     osArch: d.osArch,
     osMinor: d.osMinor,
-    id: d.id
+    id: d.id,
   }));
 }
 
 export function createWazuhManagerAgentRelationships(
   manager: WazuhManagerEntity,
-  agents: AgentEntity[]
+  agents: AgentEntity[],
 ) {
   const relationships = [];
   for (const agent of agents) {
@@ -95,13 +88,13 @@ export function createWazuhManagerAgentRelationships(
 
 function createWazuhManagerAgentRelationship(
   manager: WazuhManagerEntity,
-  agent: AgentEntity
+  agent: AgentEntity,
 ): RelationshipFromIntegration {
   return {
     _key: `${manager._key}_has_${agent._key}`,
     _type: WAZUH_MANAGER_AGENT_RELATIONSHIP_TYPE,
     _class: WAZUH_MANAGER_AGENT_RELATIONSHIP_CLASS,
     _fromEntityKey: manager._key,
-    _toEntityKey: agent._key
+    _toEntityKey: agent._key,
   };
 }

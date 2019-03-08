@@ -1,4 +1,4 @@
-require("isomorphic-fetch");
+import "isomorphic-fetch";
 
 export interface WazuhManager {
   id: string;
@@ -36,81 +36,68 @@ export interface Agent {
 
 export interface ProviderConfig {
   userId: string;
-  secret: string;
-  baseUrlProtocal: string;
-  baseUrlHost: string;
+  password: string;
+  scheme: string;
+  host: string;
+  port: string;
 }
 
 export class ProviderClient {
   private managerUrl: string;
   private agentUrl: string;
 
-  constructor(_providerConfig: ProviderConfig) {
+  constructor(providerConfig: ProviderConfig) {
     if (
-      _providerConfig.userId === undefined ||
-      _providerConfig.userId === undefined ||
-      _providerConfig.userId === "" ||
-      _providerConfig.userId === ""
+      providerConfig.userId === undefined ||
+      providerConfig.userId === undefined ||
+      providerConfig.userId === "" ||
+      providerConfig.userId === ""
     ) {
       throw new Error("User ID and Password required");
     } else {
-      this.manager_Url = `${_providerConfig.baseUrlProtocal}${
-        _providerConfig.userId
-      }:${_providerConfig.secret}@${_providerConfig.baseUrlHost}/manager/info`;
-      this.agent_Url = `${_providerConfig.baseUrlProtocal}${
-        _providerConfig.userId
-      }:${_providerConfig.secret}@${_providerConfig.baseUrlHost}/agents`;
-      console.log(this.manager_Url);
-      console.log(this.agent_Url);
+      this.managerUrl = `${providerConfig.scheme}://${providerConfig.userId}:${
+        providerConfig.password
+      }@${providerConfig.host}:${providerConfig.port}/manager/info`;
+      this.agentUrl = `${providerConfig.scheme}://${providerConfig.userId}:${
+        providerConfig.password
+      }@${providerConfig.host}:${providerConfig.port}/agents`;
     }
   }
 
-  public async fetchManagerInfo(): Promise<string> {
-    return await fetch(this.manager_Url)
-      .then((response: Response) => {
-        return response.json();
-      })
-      .then(data => {
-        return JSON.stringify(data);
-      })
-      .catch(error => {
-        throw new Error(`${error}: fetching provider info`);
-      });
-  }
-
   public async fetchManager(): Promise<WazuhManager> {
-    return await this.fetchManagerInfo()
-      .then(info => {
-        const provider = JSON.parse(info);
-        return {
-          compilationDate: provider.data.compilation_date,
-          version: provider.data.version,
-          opensslSupport: provider.data.openssl_support,
-          maxAgents: provider.data.max_agents,
-          rulesetVersion: provider.data.ruleset_version,
-          path: provider.data.path,
-          tzName: provider.data.tz_name,
-          type: provider.data.type,
-          tzOffset: provider.data.tz_offset,
-          id: "0"
-        };
-      })
-      .catch(error => {
-        throw new Error(`${error}: fetching wazuh manager info `);
-      });
+    try {
+      const response: Response = await fetch(this.managerUrl);
+      const info = JSON.stringify(await response.json());
+      const provider = JSON.parse(info);
+      return {
+        compilationDate: provider.data.compilation_date,
+        version: provider.data.version,
+        opensslSupport: provider.data.openssl_support,
+        maxAgents: provider.data.max_agents,
+        rulesetVersion: provider.data.ruleset_version,
+        path: provider.data.path,
+        tzName: provider.data.tz_name,
+        type: provider.data.type,
+        tzOffset: provider.data.tz_offset,
+        id: "0",
+      };
+    } catch (error) {
+      throw new Error(`${error}: fetching provider info`);
+    }
   }
 
-  public async fetchAgentsInfo(): Promise<string> {
-    return await fetch(this.agent_Url)
-      .then((response: Response) => {
-        return response.json();
-      })
-      .then(data => {
-        return data;
-      })
-      .catch(error => {
-        throw new Error(`${error}: fetching agents`);
-      });
+  public async fetchAgents(): Promise<Agent[]> {
+    try {
+      const response: Response = await fetch(this.agentUrl);
+      const agentInfo = JSON.parse(JSON.stringify(await response.json()));
+      const agents = [];
+      for (const agent of agentInfo.data.items) {
+        agents.push(this.mapToAgent(agent));
+      }
+      return agents;
+    } catch (error) {
+      throw new Error(`${error}: fetching agents`);
+    }
   }
 
   private mapToAgent(a: string): Agent {
@@ -159,22 +146,7 @@ export class ProviderClient {
           ? agent.os.minor
           : "",
       id: agent.id,
-      ownerId: "0"
+      ownerId: "0",
     };
-  }
-
-  public async fetchAgents(): Promise<Agent[]> {
-    return await this.fetchAgentsInfo()
-      .then(info => {
-        const agentInfo = JSON.parse(JSON.stringify(info));
-        const agents = [];
-        for (const agent of agentInfo.data.items) {
-          agents.push(this.mapToAgent(agent));
-        }
-        return agents;
-      })
-      .catch(error => {
-        throw new Error(`${error}: fetching agents`);
-      });
   }
 } // end of class
