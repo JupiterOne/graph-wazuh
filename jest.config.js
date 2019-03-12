@@ -2,9 +2,14 @@ module.exports = {
   transform: {
     "^.+\\.tsx?$": "ts-jest",
   },
-  testMatch: ["<rootDir>/src/*.test.{js,ts}"],
-  collectCoverageFrom: ["src/*.ts"],
-  coveragePathIgnorePatterns: ["<rootDir>/src/index.ts"],
+  testMatch: ["<rootDir>/src/**/*.test.{js,ts}"],
+  collectCoverageFrom: [
+    "src/**/*.ts",
+    "!src/index.ts",
+    "!src/executionHandler.ts",
+    "!src/invocationValidator.ts",
+    "!src/provider.ts",
+  ],
   moduleFileExtensions: ["ts", "js"],
   testEnvironment: "node",
   clearMocks: true,
