@@ -1,3 +1,4 @@
+import { IntegrationInstanceAuthenticationError } from "@jupiterone/jupiter-managed-integration-sdk";
 import "isomorphic-fetch";
 
 export interface WazuhManager {
@@ -47,26 +48,23 @@ export class ProviderClient {
   private agentUrl: string;
 
   constructor(providerConfig: ProviderConfig) {
-    if (
-      providerConfig.userId === undefined ||
-      providerConfig.userId === undefined ||
-      providerConfig.userId === "" ||
-      providerConfig.userId === ""
-    ) {
-      throw new Error("User ID and Password required");
-    } else {
-      this.managerUrl = `${providerConfig.scheme}://${providerConfig.userId}:${
-        providerConfig.password
-      }@${providerConfig.host}:${providerConfig.port}/manager/info`;
-      this.agentUrl = `${providerConfig.scheme}://${providerConfig.userId}:${
-        providerConfig.password
-      }@${providerConfig.host}:${providerConfig.port}/agents`;
-    }
+    this.managerUrl = `${providerConfig.scheme}://${providerConfig.userId}:${
+      providerConfig.password
+    }@${providerConfig.host}:${providerConfig.port}/manager/info`;
+
+    this.agentUrl = `${providerConfig.scheme}://${providerConfig.userId}:${
+      providerConfig.password
+    }@${providerConfig.host}:${providerConfig.port}/agents`;
   }
 
   public async fetchManager(): Promise<WazuhManager> {
     try {
       const response: Response = await fetch(this.managerUrl);
+      if (response.status === 401) {
+        throw new IntegrationInstanceAuthenticationError(
+          Error(response.statusText),
+        );
+      }
       const info = JSON.stringify(await response.json());
       const provider = JSON.parse(info);
       return {
@@ -89,6 +87,11 @@ export class ProviderClient {
   public async fetchAgents(): Promise<Agent[]> {
     try {
       const response: Response = await fetch(this.agentUrl);
+      if (response.status === 401) {
+        throw new IntegrationInstanceAuthenticationError(
+          Error(response.statusText),
+        );
+      }
       const agentInfo = JSON.parse(JSON.stringify(await response.json()));
       const agents = [];
       for (const agent of agentInfo.data.items) {
@@ -96,7 +99,8 @@ export class ProviderClient {
       }
       return agents;
     } catch (error) {
-      throw new Error(`${error}: fetching agents`);
+      //      throw new Error(`${error}: fetching agents`);
+      throw error;
     }
   }
 

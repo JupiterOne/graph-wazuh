@@ -78,26 +78,11 @@ function getProviderClient(providerConfig: ProviderConfig): ProviderClient {
 
 function providerConfigEnv(): ProviderConfig {
   return {
-    userId:
-      process.env.WAZUH_API_USER !== undefined
-        ? process.env.WAZUH_API_USER
-        : "foo",
-    password:
-      process.env.WAZUH_API_PASSWORD !== undefined
-        ? process.env.WAZUH_API_PASSWORD
-        : "bar",
-    host:
-      process.env.WAZUH_API_HOST !== undefined
-        ? process.env.WAZUH_API_HOST
-        : "localhost",
-    port:
-      process.env.WAZUH_API_PORT !== undefined
-        ? process.env.WAZUH_API_PORT
-        : "55000",
-    scheme:
-      process.env.WAZUH_API_SCHEME !== undefined
-        ? process.env.WAZUH_API_SCHEME
-        : "https",
+    userId: process.env.WAZUH_API_USER || "foo",
+    password: process.env.WAZUH_API_PASSWORD || "bar",
+    host: process.env.WAZUH_API_HOST || "localhost",
+    port: process.env.WAZUH_API_PORT || "55000",
+    scheme: process.env.WAZUH_API_SCHEME || "https",
   };
 }
 
@@ -108,18 +93,7 @@ test("Wazuh Manager request and type check", async () => {
   expect(manager.type).toEqual("manager");
 });
 
-// test("Wazuh Manager request fails invalid password", async () => {
-//   expect.hasAssertions();
-//   try {
-//     let providerConfig: ProviderConfig = providerConfigEnv();
-//     providerConfig.password = "foo";
-//     let providerClient: ProviderClient = getProviderClient(providerConfig);
-//     await providerClient.fetchManager();
-//   } catch (e) {
-//   }
-// });
-
-test("Listing all registered agents ", async () => {
+test("Listing all registered agents and validate status", async () => {
   const ValidManger = ["manager", "wazuh-server"];
   const ValidStatus = ["Active", "Disconnected"];
   const providerClient: ProviderClient = getProviderClient(providerConfigEnv());
@@ -129,4 +103,26 @@ test("Listing all registered agents ", async () => {
     expect(ValidStatus).toEqual(expect.arrayContaining([agent.status]));
     expect(ValidManger).toEqual(expect.arrayContaining([agent.manager]));
   });
+});
+
+test("Invalid manager password ", async () => {
+  const providerConfig: ProviderConfig = providerConfigEnv();
+  providerConfig.password = "xxx";
+  const providerClient: ProviderClient = getProviderClient(providerConfig);
+  try {
+    await providerClient.fetchManager();
+  } catch (error) {
+    expect.hasAssertions();
+  }
+});
+
+test("Invalid agent password ", async () => {
+  const providerConfig: ProviderConfig = providerConfigEnv();
+  providerConfig.password = "xxx";
+  const providerClient: ProviderClient = getProviderClient(providerConfig);
+  try {
+    await providerClient.fetchAgents();
+  } catch (error) {
+    expect.hasAssertions();
+  }
 });

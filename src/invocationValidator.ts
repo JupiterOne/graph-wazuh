@@ -1,5 +1,6 @@
 import {
   IntegrationExecutionContext,
+  IntegrationInstanceAuthenticationError,
   IntegrationInvocationEvent,
 } from "@jupiterone/jupiter-managed-integration-sdk";
 import initializeContext from "./initializeContext";
@@ -21,6 +22,6 @@ export default async function invocationValidator(
   const wazuhExectionContext = initializeContext(executionContext);
 
   wazuhExectionContext.provider.fetchManager().catch(error => {
-    throw new Error(`${error}: validating provider connection`);
+    throw new IntegrationInstanceAuthenticationError(error);
   });
 }

@@ -59,6 +59,6 @@ export default async function executionHandler(
       ]),
     };
   } catch (error) {
-    throw new Error(error);
+    throw error;
   }
 }

@@ -77,22 +77,22 @@ function fetchAgents(): Agent[] {
   ];
 }
 
-test("Wazuh Manager being converted to Manager Entity where manager = manager entyity.", () => {
+test("Wazuh Manager being converted to Manager Entity where manager = manager entity.", () => {
   const m: WazuhManager = fetchManager();
   const managerEntity: WazuhManagerEntity = createWazuhManagerEntities(m);
 
-  expect(m.id).toEqual(managerEntity.id);
-  expect(m.compilationDate).toEqual(managerEntity.compilationDate);
-  expect(m.version).toEqual(managerEntity.version);
-  expect(m.opensslSupport).toEqual(managerEntity.opensslSupport);
-  expect(m.maxAgents).toEqual(managerEntity.maxAgents);
-  expect(m.rulesetVersion).toEqual(managerEntity.rulesetVersion);
-  expect(m.path).toEqual(managerEntity.path);
-  expect(m.tzName).toEqual(managerEntity.tzName);
-  expect(m.type).toEqual(managerEntity.type);
-  expect(m.tzOffset).toEqual(managerEntity.tzOffset);
-  expect(`${WAZUH_MANAGER_ENTITY_TYPE}-${m.id}`).toEqual(managerEntity._key);
-  expect(`${m.type} ${m.version}`).toEqual(managerEntity.displayName);
+  expect(managerEntity.id).toEqual(m.id);
+  expect(managerEntity.compilationDate).toEqual(m.compilationDate);
+  expect(managerEntity.version).toEqual(m.version);
+  expect(managerEntity.opensslSupport).toEqual(m.opensslSupport);
+  expect(managerEntity.maxAgents).toEqual(m.maxAgents);
+  expect(managerEntity.rulesetVersion).toEqual(m.rulesetVersion);
+  expect(managerEntity.path).toEqual(m.path);
+  expect(managerEntity.tzName).toEqual(m.tzName);
+  expect(managerEntity.type).toEqual(m.type);
+  expect(managerEntity.tzOffset).toEqual(m.tzOffset);
+  expect(managerEntity._key).toEqual(`${WAZUH_MANAGER_ENTITY_TYPE}-${m.id}`);
+  expect(managerEntity.displayName).toEqual(`${m.type} ${m.version}`);
 });
 
 test("Wazuh Agents being converted to Agent Entities where agent = agent entyity.", () => {
@@ -100,28 +100,28 @@ test("Wazuh Agents being converted to Agent Entities where agent = agent entyity
   const agentEntity: AgentEntity[] = createAgentEntities(a);
 
   for (let i: number = 0; i < a.length; i++) {
-    expect(a[i].id).toEqual(agentEntity[i].id);
-    expect(a[i].status).toEqual(agentEntity[i].status);
-    expect(a[i].name).toEqual(agentEntity[i].name);
-    expect(a[i].ip).toEqual(agentEntity[i].ip);
-    expect(a[i].manager).toEqual(agentEntity[i].manager);
-    expect(a[i].nodeName).toEqual(agentEntity[i].nodeName);
-    expect(a[i].dateAdd).toEqual(agentEntity[i].dateAdd);
-    expect(a[i].version).toEqual(agentEntity[i].version);
-    expect(a[i].lastKeepAlive).toEqual(agentEntity[i].lastKeepAlive);
-    expect(a[i].osMajor).toEqual(agentEntity[i].osMajor);
-    expect(a[i].osName).toEqual(agentEntity[i].osName);
-    expect(a[i].osUname).toEqual(agentEntity[i].osUname);
-    expect(a[i].osPlatform).toEqual(agentEntity[i].osPlatform);
-    expect(a[i].osVersion).toEqual(agentEntity[i].osVersion);
-    expect(a[i].osCodename).toEqual(agentEntity[i].osCodename);
-    expect(a[i].osArch).toEqual(agentEntity[i].osArch);
-    expect(a[i].osMinor).toEqual(agentEntity[i].osMinor);
-    expect(AGENT_ENTITY_TYPE).toEqual(agentEntity[i]._type);
-    expect(AGENT_ENTITY_CLASS).toEqual(agentEntity[i]._class);
-    expect(`${AGENT_ENTITY_TYPE}-id-${a[i].id}`).toEqual(agentEntity[i]._key);
-    expect(`${a[i].name}: ${a[i].nodeName}`).toEqual(
-      agentEntity[i].displayName,
+    expect(agentEntity[i].id).toEqual(a[i].id);
+    expect(agentEntity[i].status).toEqual(a[i].status);
+    expect(agentEntity[i].name).toEqual(a[i].name);
+    expect(agentEntity[i].ip).toEqual(a[i].ip);
+    expect(agentEntity[i].manager).toEqual(a[i].manager);
+    expect(agentEntity[i].nodeName).toEqual(a[i].nodeName);
+    expect(agentEntity[i].dateAdd).toEqual(a[i].dateAdd);
+    expect(agentEntity[i].version).toEqual(a[i].version);
+    expect(agentEntity[i].lastKeepAlive).toEqual(a[i].lastKeepAlive);
+    expect(agentEntity[i].osMajor).toEqual(a[i].osMajor);
+    expect(agentEntity[i].osName).toEqual(a[i].osName);
+    expect(agentEntity[i].osUname).toEqual(a[i].osUname);
+    expect(agentEntity[i].osPlatform).toEqual(a[i].osPlatform);
+    expect(agentEntity[i].osVersion).toEqual(a[i].osVersion);
+    expect(agentEntity[i].osCodename).toEqual(a[i].osCodename);
+    expect(agentEntity[i].osArch).toEqual(a[i].osArch);
+    expect(agentEntity[i].osMinor).toEqual(a[i].osMinor);
+    expect(agentEntity[i]._type).toEqual(AGENT_ENTITY_TYPE);
+    expect(agentEntity[i]._class).toEqual(AGENT_ENTITY_CLASS);
+    expect(agentEntity[i]._key).toEqual(`${AGENT_ENTITY_TYPE}-id-${a[i].id}`);
+    expect(agentEntity[i].displayName).toEqual(
+      `${a[i].name}: ${a[i].nodeName}`,
     );
   }
 });
@@ -137,16 +137,16 @@ test("Wazuh Manager has Agents relationship.", () => {
   );
 
   for (let i: number = 0; i < managerAgentRel.length; i++) {
-    expect(`${mEntity._key}_has_${aEntity[i]._key}`).toEqual(
-      managerAgentRel[i]._key,
+    expect(managerAgentRel[i]._key).toEqual(
+      `${mEntity._key}_has_${aEntity[i]._key}`,
     );
-    expect(WAZUH_MANAGER_AGENT_RELATIONSHIP_TYPE).toEqual(
-      managerAgentRel[i]._type,
+    expect(managerAgentRel[i]._type).toEqual(
+      WAZUH_MANAGER_AGENT_RELATIONSHIP_TYPE,
     );
-    expect(WAZUH_MANAGER_AGENT_RELATIONSHIP_CLASS).toEqual(
-      managerAgentRel[i]._class,
+    expect(managerAgentRel[i]._class).toEqual(
+      WAZUH_MANAGER_AGENT_RELATIONSHIP_CLASS,
     );
-    expect(mEntity._key).toEqual(managerAgentRel[i]._fromEntityKey);
-    expect(aEntity[i]._key).toEqual(managerAgentRel[i]._toEntityKey);
+    expect(managerAgentRel[i]._fromEntityKey).toEqual(mEntity._key);
+    expect(managerAgentRel[i]._toEntityKey).toEqual(aEntity[i]._key);
   }
 });
