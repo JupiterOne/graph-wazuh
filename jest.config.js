@@ -1,6 +1,8 @@
+const { defaults } = require("jest-config");
+
 module.exports = {
   transform: {
-    "^.+\\.tsx?$": "ts-jest",
+    "^.+\\.ts?$": "ts-jest",
   },
   testMatch: ["<rootDir>/src/**/*.test.{js,ts}"],
   collectCoverageFrom: [
@@ -10,7 +12,7 @@ module.exports = {
     "!src/invocationValidator.ts",
     "!src/provider.ts",
   ],
-  moduleFileExtensions: ["ts", "js"],
+  moduleFileExtensions: [...defaults.moduleFileExtensions, "ts"],
   testEnvironment: "node",
   clearMocks: true,
   collectCoverage: true,
