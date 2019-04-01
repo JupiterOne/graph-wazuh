@@ -70,19 +70,18 @@ class ProviderClientMock extends ProviderClient {
 }
 
 function getProviderClient(providerConfig: ProviderConfig): ProviderClient {
-  return process.env.WAZUH_API_INTEGRATION !== undefined &&
-    process.env.WAZUH_API_INTEGRATION === "1"
+  return process.env.WAZUH_LOCAL_EXECUTION_MODE === "1"
     ? new ProviderClient(providerConfigEnv())
     : new ProviderClientMock(providerConfigEnv());
 }
 
 function providerConfigEnv(): ProviderConfig {
   return {
-    userId: process.env.WAZUH_API_USER || "foo",
-    password: process.env.WAZUH_API_PASSWORD || "bar",
-    host: process.env.WAZUH_API_HOST || "localhost",
-    port: process.env.WAZUH_API_PORT || "55000",
-    scheme: process.env.WAZUH_API_SCHEME || "https",
+    username: process.env.WAZUH_LOCAL_EXECUTION_USERNAME || "foo",
+    password: process.env.WAZUH_LOCAL_EXECUTION_PASSWORD || "bar",
+    managerUrl:
+      process.env.WAZUH_LOCAL_EXECUTION_MANAGER_URL ||
+      "https://localhost:55000",
   };
 }
 

@@ -22,7 +22,7 @@
     "test": "jest"
   },
   "dependencies": {
-    "isomorphic-fetch": "^2.2.1"
+    "node-fetch": "^2.3.0"
   },
   "peerDependencies": {
     "@jupiterone/jupiter-managed-integration-sdk": "^21.0.0"
@@ -37,9 +37,9 @@
     "@jupiterone/jupiter-managed-integration-sdk": "^21.0.0",
     "@types/bunyan": "^1.8.5",
     "@types/fs-extra": "^5.0.5",
-    "@types/isomorphic-fetch": "^0.0.35",
     "@types/jest": "^24.0.0",
     "@types/node": "^10.12.20",
+    "@types/node-fetch": "^2.1.7",
     "@types/request": "^2.48.1",
     "bunyan": "^1.8.12",
     "dotenv": "^7.0.0",

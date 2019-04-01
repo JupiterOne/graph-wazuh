@@ -1,5 +1,5 @@
 import { IntegrationInstanceAuthenticationError } from "@jupiterone/jupiter-managed-integration-sdk";
-import "isomorphic-fetch";
+import fetch from "node-fetch";
 
 export interface WazuhManager {
   id: string;
@@ -36,72 +36,65 @@ export interface Agent {
 }
 
 export interface ProviderConfig {
-  userId: string;
+  username: string;
   password: string;
-  scheme: string;
-  host: string;
-  port: string;
+  managerUrl: string;
 }
 
 export class ProviderClient {
-  private managerUrl: string;
-  private agentUrl: string;
+  private requestOptions: object;
 
-  constructor(providerConfig: ProviderConfig) {
-    this.managerUrl = `${providerConfig.scheme}://${providerConfig.userId}:${
-      providerConfig.password
-    }@${providerConfig.host}:${providerConfig.port}/manager/info`;
-
-    this.agentUrl = `${providerConfig.scheme}://${providerConfig.userId}:${
-      providerConfig.password
-    }@${providerConfig.host}:${providerConfig.port}/agents`;
+  constructor(readonly config: ProviderConfig) {
+    const authorization = Buffer.from(
+      `${config.username}:${config.password}`,
+    ).toString("base64");
+    this.requestOptions = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Basic ${authorization}`,
+      },
+    };
   }
 
   public async fetchManager(): Promise<WazuhManager> {
-    try {
-      const response: Response = await fetch(this.managerUrl);
-      if (response.status === 401) {
-        throw new IntegrationInstanceAuthenticationError(
-          Error(response.statusText),
-        );
-      }
-      const info = JSON.stringify(await response.json());
-      const provider = JSON.parse(info);
-      return {
-        compilationDate: provider.data.compilation_date,
-        version: provider.data.version,
-        opensslSupport: provider.data.openssl_support,
-        maxAgents: provider.data.max_agents,
-        rulesetVersion: provider.data.ruleset_version,
-        path: provider.data.path,
-        tzName: provider.data.tz_name,
-        type: provider.data.type,
-        tzOffset: provider.data.tz_offset,
-        id: "0",
-      };
-    } catch (error) {
-      throw new Error(`${error}: fetching provider info`);
+    const response = await fetch(
+      `${this.config.managerUrl}/manager/info`,
+      this.requestOptions,
+    );
+    if (response.status === 401) {
+      throw new IntegrationInstanceAuthenticationError(
+        Error(response.statusText),
+      );
     }
+    const info = JSON.stringify(await response.json());
+    const provider = JSON.parse(info);
+    return {
+      compilationDate: provider.data.compilation_date,
+      version: provider.data.version,
+      opensslSupport: provider.data.openssl_support,
+      maxAgents: provider.data.max_agents,
+      rulesetVersion: provider.data.ruleset_version,
+      path: provider.data.path,
+      tzName: provider.data.tz_name,
+      type: provider.data.type,
+      tzOffset: provider.data.tz_offset,
+      id: "0",
+    };
   }
 
   public async fetchAgents(): Promise<Agent[]> {
-    try {
-      const response: Response = await fetch(this.agentUrl);
-      if (response.status === 401) {
-        throw new IntegrationInstanceAuthenticationError(
-          Error(response.statusText),
-        );
-      }
-      const agentInfo = JSON.parse(JSON.stringify(await response.json()));
-      const agents = [];
-      for (const agent of agentInfo.data.items) {
-        agents.push(this.mapToAgent(agent));
-      }
-      return agents;
-    } catch (error) {
-      //      throw new Error(`${error}: fetching agents`);
-      throw error;
+    const response = await fetch(`${this.config.managerUrl}/agents`);
+    if (response.status === 401) {
+      throw new IntegrationInstanceAuthenticationError(
+        Error(response.statusText),
+      );
     }
+    const agentInfo = JSON.parse(JSON.stringify(await response.json()));
+    const agents = [];
+    for (const agent of agentInfo.data.items) {
+      agents.push(this.mapToAgent(agent));
+    }
+    return agents;
   }
 
   private mapToAgent(a: string): Agent {
@@ -153,4 +146,4 @@ export class ProviderClient {
       ownerId: "0",
     };
   }
-} // end of class
+}

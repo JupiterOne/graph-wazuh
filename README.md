@@ -137,17 +137,15 @@ A development Wazuh environment may be established by following these
 [instructions](https://documentation.wazuh.com/current/installation-guide/index.html).
 
 To perform integration tests with your Wazuh API server, set the
-`WAZUH_API_INTEGRATION=1` befor running tests.
+`WAZUH_LOCAL_EXECUTION_MODE=1` befor running tests.
 
 These may be added to your `.env` with values to overrided the defaults listed
 here.
 
-- `WAZUH_API_USERNAME`
-- `WAZUH_API_PASSWORD`
-- `WAZUH_API_HOST` - `"localhost"`
-- `WAZUH_API_PORT` - `"55000"`
-- `WAZUH_API_SCHEME` - `"http"`
-- `WAZUH_API_INTEGRATION` - `"0"`
+- `WAZUH_LOCAL_EXECUTION_USERNAME`
+- `WAZUH_LOCAL_EXECUTION_PASSWORD`
+- `WAZUH_LOCAL_EXECUTION_MANAGER_URL` - `"https://localhost:55000"`
+- `WAZUH_LOCAL_EXECUTION_MODE` - `"0"`
 
 ### Running tests
 
