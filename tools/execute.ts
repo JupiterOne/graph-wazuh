@@ -11,23 +11,19 @@ async function run(): Promise<void> {
   const logger = createLogger({ name: "local", level: TRACE });
 
   if (
-    !process.env.WAZUH_API_USER ||
-    !process.env.WAZUH_API_PASSWORD ||
-    !process.env.WAZUH_API_HOST ||
-    !process.env.WAZUH_API_PORT ||
-    !process.env.WAZUH_API_SCHEME
+    !process.env.WAZUH_LOCAL_EXECUTION_USERNAME ||
+    !process.env.WAZUH_LOCAL_EXECUTION_PASSWORD ||
+    !process.env.WAZUH_LOCAL_EXECUTION_MANAGER_URL
   ) {
     throw new Error(
-      "Local execution requires the WAZUH CONFIG variables be set",
+      "Local execution requires WAZUH_LOCAL_EXECUTION_* variables",
     );
   }
 
   const integrationConfig: ProviderConfig = {
-    userId: process.env.WAZUH_API_USER,
-    password: process.env.WAZUH_API_PASSWORD,
-    host: process.env.WAZUH_API_HOST,
-    port: process.env.WAZUH_API_PORT,
-    scheme: process.env.WAZUH_API_SCHEME,
+    username: process.env.WAZUH_LOCAL_EXECUTION_USERNAME,
+    password: process.env.WAZUH_LOCAL_EXECUTION_PASSWORD,
+    managerUrl: process.env.WAZUH_LOCAL_EXECUTION_MANAGER_URL,
   };
 
   logger.info(
@@ -35,7 +31,7 @@ async function run(): Promise<void> {
       integrationConfig,
       logger,
       executionHandler,
-      // invocationArgs,
+      {},
       createLocalInvocationEvent(),
     ),
     "Execution completed successfully!",

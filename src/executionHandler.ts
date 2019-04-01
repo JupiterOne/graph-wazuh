@@ -14,51 +14,43 @@ import {
   WAZUH_MANAGER_ENTITY_TYPE,
   WazuhManagerEntity,
 } from "./converters";
-
-import { WazuhManager } from "./provider";
-
 import initializeContext from "./initializeContext";
+import { WazuhManager } from "./provider";
 
 export default async function executionHandler(
   context: IntegrationExecutionContext<IntegrationInvocationEvent>,
 ): Promise<IntegrationExecutionResult> {
-  try {
-    const { graph, persister, provider } = initializeContext(context);
+  const { graph, persister, provider } = initializeContext(context);
 
-    const [
-      oldManagerEntities,
-      oldAgentEntities,
-      oldManagerAgentRelationships,
-    ] = await Promise.all([
-      graph.findEntitiesByType<WazuhManagerEntity>(WAZUH_MANAGER_ENTITY_TYPE),
-      graph.findEntitiesByType<AgentEntity>(AGENT_ENTITY_TYPE),
-      graph.findRelationshipsByType(WAZUH_MANAGER_AGENT_RELATIONSHIP_TYPE),
-    ]);
+  const [
+    oldManagerEntities,
+    oldAgentEntities,
+    oldManagerAgentRelationships,
+  ] = await Promise.all([
+    graph.findEntitiesByType<WazuhManagerEntity>(WAZUH_MANAGER_ENTITY_TYPE),
+    graph.findEntitiesByType<AgentEntity>(AGENT_ENTITY_TYPE),
+    graph.findRelationshipsByType(WAZUH_MANAGER_AGENT_RELATIONSHIP_TYPE),
+  ]);
 
-    const manager: WazuhManager = await provider.fetchManager();
-    manager.id = context.instance.id;
-    const managerEntity: WazuhManagerEntity = createWazuhManagerEntities(
-      manager,
-    );
-    const agentEntities: AgentEntity[] = createAgentEntities(
-      await provider.fetchAgents(),
-    );
+  const manager: WazuhManager = await provider.fetchManager();
+  manager.id = context.instance.id;
+  const managerEntity: WazuhManagerEntity = createWazuhManagerEntities(manager);
+  const agentEntities: AgentEntity[] = createAgentEntities(
+    await provider.fetchAgents(),
+  );
 
-    return {
-      operations: await persister.publishPersisterOperations([
-        [
-          ...persister.processEntities(oldManagerEntities, [managerEntity]),
-          ...persister.processEntities(oldAgentEntities, agentEntities),
-        ],
-        [
-          ...persister.processRelationships(
-            oldManagerAgentRelationships,
-            createWazuhManagerAgentRelationships(managerEntity, agentEntities),
-          ),
-        ],
-      ]),
-    };
-  } catch (error) {
-    throw error;
-  }
+  return {
+    operations: await persister.publishPersisterOperations([
+      [
+        ...persister.processEntities(oldManagerEntities, [managerEntity]),
+        ...persister.processEntities(oldAgentEntities, agentEntities),
+      ],
+      [
+        ...persister.processRelationships(
+          oldManagerAgentRelationships,
+          createWazuhManagerAgentRelationships(managerEntity, agentEntities),
+        ),
+      ],
+    ]),
+  };
 }

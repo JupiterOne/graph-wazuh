@@ -1,5 +1,7 @@
 # JupiterOne Managed Integration for Wazuh
 
+[![Build Status](https://travis-ci.org/JupiterOne/jupiter-integration-wazuh.svg?branch=master)](https://travis-ci.org/JupterOne/jupiter-integration-wazuh)
+
 A JupiterOne integration ingests information such as configurations and other
 metadata about digital and physical assets belonging to an organization. The
 integration is responsible for connecting to data provider APIs and determining
@@ -15,10 +17,38 @@ connect to provider APIs. An integration is triggered by an event containing the
 instance configuration. `IntegrationInstance.config` is encrypted at rest and
 decrypted before it is delivered to the integration execution handler.
 
+Currently, the integration instance configuration user interface will need code
+changes to collect necessary information.
+
 Local execution of the integration is started through `execute.ts`
 (`yarn start`), which may be changed to load development credentials into the
 `IntegrationInstance.config`. Use environment variables to avoid publishing
 sensitive information to GitHub!
+
+## Documentation
+
+Integration projects must provide documentation for docs.jupiterone.io. This
+documentation should outline the credentials required by the data provider API
+(including specific permissions if the data provider allows scoping of
+credentials), which entities are ingested, and what relationships are created.
+At build time, this documentation will be placed in a docs folder inside dist so
+that it's included in the NPM module.
+
+The documentation should be placed in `docs/jupiterone-io` and named after the
+package. For example, an AWS integration with the name "jupiter-integration-aws"
+in `package.json` should have its documentation in
+`docs/jupiterone-io/jupiter-integration-aws.md`. Any other files in
+`docs/jupiterone-io` will not be published. Also note that namespace is ignored,
+so "jupiter-integration-aws" and "@jupiterone/jupiter-integration-aws" should
+both name their docs file the same.
+
+The first header in the documentation is used as the title of the document in
+the table of contents on docs.jupiterone.io, so it should be the name of the
+provider (E.G. "AWS").
+
+The documentation is pushed to docs.jupiterone.io every time a new version of
+the integration is specified in `package.json`, so make sure it's up to date
+every time you release a new version.
 
 ## Development Environment
 
@@ -26,20 +56,21 @@ Integrations mutate the graph to reflect configurations and metadata from the
 provider. Developing an integration involves:
 
 1.  Establishing a secure connection to a provider API
-2.  Fetching provider data and converting it to entities and relationships
-3.  Collecting the existing set of entities and relationships already in the
+1.  Fetching provider data and converting it to entities and relationships
+1.  Collecting the existing set of entities and relationships already in the
     graph
-4.  Performing a diff to determine which entites/relationships to
+1.  Performing a diff to determine which entites/relationships to
     create/update/delete
-5.  Delivering create/update/delete operations to the persister to update the
+1.  Delivering create/update/delete operations to the persister to update the
     graph
 
-Run the integration to see what happens:
+Run the integration to see what happens. You may use use Node to execute
+directly on your machine (NVM is recommended).
 
 1.  Install Docker
-2.  `yarn install`
-3.  `yarn start:graph`
-4.  `yarn start`
+1.  `yarn install`
+1.  `yarn start:graph`
+1.  `yarn start`
 
 Activity is logged to the console indicating the operations produced and
 processed. View raw data in the graph database using
@@ -49,30 +80,72 @@ Execute the integration again to see that there are no change operations
 produced.
 
 Restart the graph server to clear the data when you want to run the integration
-with no existing data:
+with no existing data.
 
-1.  `yarn stop:graph`
-2.  `yarn start:graph`
+```sh
+yarn stop:graph && yarn start:graph
+```
 
 ### Environment Variables
 
+Provider API configuration is specified by users when they install the
+integration into their JupiterOne environment. Some integrations may also
+require pre-shared secrets, used across all integration installations, which is
+to be secured by JupiterOne and provided in the execution context.
+
+Local execution requires the same configuration parameters for a development
+provider account. `tools/execute.ts` is the place to provide the parameters. The
+execution script must not include any credentials, and it is important to make
+it easy for other developers to execute the integration against their own
+development provider account.
+
+1. Update `tools/execute.ts` to provide the properties required by the
+   `executionHandler` function
+1. Create a `.env` file to provide the environment variables transferred into
+   the properties
+
+For example, given this execution script:
+
+```typescript
+const integrationConfig = {
+  apiToken: process.env.MYPROVIDER_LOCAL_EXECUTION_API_TOKEN,
+};
+
+const invocationArgs = {
+  preSharedPrivateKey: process.env.MYPROVIDER_LOCAL_EXECUTION_PRIVATE_KEY,
+};
+```
+
+Create a `.env` file (this is `.gitignore`'d):
+
+```sh
+MYPROVIDER_LOCAL_EXECUTION_API_TOKEN=abc123
+MYPROVIDER_LOCAL_EXECUTION_PRIVATE_KEY='something\nreally\nlong'
+```
+
+#### SDK Variables
+
+Environment variables can modify some aspects of the integration SDK behavior.
+These may be added to your `.env` with values to overrided the defaults listed
+here.
+
 - `GRAPH_DB_ENDPOINT` - `"localhost"`
 
-- `WAZUH_API_USERNAME`
-- `WAZUH_API_PASSWORD`
-- `WAZUH_API_HOST` - `"localhost"`
-- `WAZUH_API_PORT` - `"55000"`
-- `WAZUH_API_SCHEME` - `"http"`
-- `WAZUH_API_INTEGRATION` - `"0"`
+#### Wazuh Variables
 
-### Wazuh Environment
-
-If you do not already have an existing Wazuh environment, you can build one by
-following these
+A development Wazuh environment may be established by following these
 [instructions](https://documentation.wazuh.com/current/installation-guide/index.html).
 
 To perform integration tests with your Wazuh API server, set the
-`WAZUH_API_INTEGRATION=1` befor running tests.
+`WAZUH_LOCAL_EXECUTION_MODE=1` befor running tests.
+
+These may be added to your `.env` with values to overrided the defaults listed
+here.
+
+- `WAZUH_LOCAL_EXECUTION_USERNAME`
+- `WAZUH_LOCAL_EXECUTION_PASSWORD`
+- `WAZUH_LOCAL_EXECUTION_MANAGER_URL` - `"https://localhost:55000"`
+- `WAZUH_LOCAL_EXECUTION_MODE` - `"0"`
 
 ### Running tests
 
@@ -81,6 +154,16 @@ and conversion from provider data to entities and relationships.
 
 To run tests locally:
 
-```shell
+```sh
 yarn test
+```
+
+### Deployment
+
+Managed integrations are deployed into the JupiterOne infrastructure by staff
+engineers using internal projects that declare a dependency on the open source
+integration NPM package. The package will be published by the JupiterOne team.
+
+```sh
+yarn build:publish
 ```

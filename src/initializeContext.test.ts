@@ -7,15 +7,15 @@ import { ProviderConfig } from "./provider";
 
 function resetConfig(): ProviderConfig {
   return {
-    userId: process.env.WAZUH_API_USER || "foo",
-    password: process.env.WAZUH_API_PASSWORD || "bar",
-    host: process.env.WAZUH_API_HOST || "localhost",
-    port: process.env.WAZUH_API_PORT || "55000",
-    scheme: process.env.WAZUH_API_SCHEME || "https",
+    username: process.env.WAZUH_LOCAL_EXECUTION_USERNAME || "foo",
+    password: process.env.WAZUH_LOCAL_EXECUTION_PASSWORD || "bar",
+    managerUrl:
+      process.env.WAZUH_LOCAL_EXECUTION_MANAGER_URL ||
+      "https://localhost:55000",
   };
 }
 
-test("creating Wazuh client with undefined config", () => {
+test("undefined config", () => {
   const executionContext = createTestIntegrationExecutionContext();
   expect(executionContext.instance.config).toBeUndefined();
   function initialize() {
@@ -24,17 +24,17 @@ test("creating Wazuh client with undefined config", () => {
   expect(initialize).toThrowError(Error);
 });
 
-test("creating Wazuh client with blank userId", () => {
+test("blank username", () => {
   const executionContext = createTestIntegrationExecutionContext();
   executionContext.instance.config = resetConfig();
-  executionContext.instance.config.userId = "";
+  executionContext.instance.config.username = "";
   function initialize() {
     initializeContext(executionContext);
   }
   expect(initialize).toThrowError(IntegrationInstanceConfigError);
 });
 
-test("creating Wazuh client with blank password", () => {
+test("blank password", () => {
   const executionContext = createTestIntegrationExecutionContext();
   executionContext.instance.config = resetConfig();
   executionContext.instance.config.password = "";
@@ -45,10 +45,10 @@ test("creating Wazuh client with blank password", () => {
   expect(initialize).toThrowError(IntegrationInstanceConfigError);
 });
 
-test("creating Wazuh client with blank host", () => {
+test("blank managerUrl", () => {
   const executionContext = createTestIntegrationExecutionContext();
   executionContext.instance.config = resetConfig();
-  executionContext.instance.config.host = "";
+  executionContext.instance.config.managerUrl = "";
 
   function initialize() {
     initializeContext(executionContext);
@@ -56,29 +56,7 @@ test("creating Wazuh client with blank host", () => {
   expect(initialize).toThrowError(IntegrationInstanceConfigError);
 });
 
-test("creating Wazuh client with blank port", () => {
-  const executionContext = createTestIntegrationExecutionContext();
-  executionContext.instance.config = resetConfig();
-  executionContext.instance.config.port = "";
-
-  function initialize() {
-    initializeContext(executionContext);
-  }
-  expect(initialize).toThrowError(IntegrationInstanceConfigError);
-});
-
-test("creating Wazuh client with blank scheme", () => {
-  const executionContext = createTestIntegrationExecutionContext();
-  executionContext.instance.config = resetConfig();
-  executionContext.instance.config.scheme = "";
-
-  function initialize() {
-    initializeContext(executionContext);
-  }
-  expect(initialize).toThrowError(IntegrationInstanceConfigError);
-});
-
-test("creating Wazuh client with completed config", () => {
+test("complete config", () => {
   const executionContext = createTestIntegrationExecutionContext();
   executionContext.instance.config = resetConfig();
   const integrationContext = initializeContext(executionContext);
