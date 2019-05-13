@@ -1,5 +1,7 @@
-export default function getTime(
-  time: Date | string | undefined,
-): number | undefined {
-  return time ? new Date(time).getTime() : undefined;
+export default function getTime(time: string | undefined): number | undefined {
+  if (!time) {
+    return undefined;
+  }
+  const utcTime = time.match("Z") ? time : time.concat("Z");
+  return new Date(utcTime).getTime();
 }
