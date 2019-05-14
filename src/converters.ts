@@ -3,6 +3,7 @@ import {
   RelationshipFromIntegration,
 } from "@jupiterone/jupiter-managed-integration-sdk";
 import { Agent, WazuhManager } from "./provider";
+import getTime from "./utils/getTime";
 
 export const WAZUH_MANAGER_ENTITY_TYPE = "wazuh_manager";
 export const WAZUH_MANAGER_ENTITY_CLASS = ["Service", "Control"];
@@ -13,13 +14,38 @@ export const AGENT_ENTITY_CLASS = "HostAgent";
 export const WAZUH_MANAGER_AGENT_RELATIONSHIP_TYPE = "wazuh_manager_has_agent";
 export const WAZUH_MANAGER_AGENT_RELATIONSHIP_CLASS = "HAS";
 
-export interface WazuhManagerEntity
-  extends EntityFromIntegration,
-    WazuhManager {
+export interface WazuhManagerEntity extends EntityFromIntegration {
+  id: string;
+  compilationDate: number;
+  version: string;
+  opensslSupport: string;
+  maxAgents: string;
+  rulesetVersion: string;
+  path: string;
+  tzName: string;
+  type: string;
+  tzOffset: string;
   managerId: string;
 }
 
-export interface AgentEntity extends EntityFromIntegration, Agent {
+export interface AgentEntity extends EntityFromIntegration {
+  status: string;
+  name: string;
+  ip: string;
+  manager?: string;
+  nodeName: string;
+  dateAdd: number;
+  version?: string;
+  lastKeepAlive?: number;
+  osMajor: string;
+  osName: string;
+  osUname: string;
+  osPlatform: string;
+  osVersion: string;
+  osCodename: string;
+  osArch: string;
+  osMinor: string;
+  id: string;
   ownerId: string;
 }
 
@@ -33,7 +59,7 @@ export function createWazuhManagerEntities(
     managerId: data.id,
     displayName: `${data.type} ${data.version}`,
     id: data.id,
-    compilationDate: data.compilationDate,
+    compilationDate: getTime(data.compilationDate)!,
     version: data.version,
     opensslSupport: data.opensslSupport,
     maxAgents: data.maxAgents,
@@ -58,9 +84,9 @@ export function createAgentEntities(data: Agent[]): AgentEntity[] {
     ip: d.ip,
     manager: d.manager,
     nodeName: d.nodeName,
-    dateAdd: d.dateAdd,
+    dateAdd: getTime(d.dateAdd)!,
     version: d.version,
-    lastKeepAlive: d.lastKeepAlive,
+    lastKeepAlive: getTime(d.lastKeepAlive),
     osMajor: d.osMajor,
     osName: d.osName,
     osUname: d.osUname,
