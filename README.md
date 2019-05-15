@@ -1,6 +1,6 @@
 # JupiterOne Managed Integration for Wazuh
 
-[![Build Status](https://travis-ci.org/JupiterOne/jupiter-integration-wazuh.svg?branch=master)](https://travis-ci.org/JupterOne/jupiter-integration-wazuh)
+[![Build Status](https://travis-ci.org/JupiterOne/jupiter-integration-wazuh.svg?branch=master)](https://travis-ci.org/JupiterOne/jupiter-integration-wazuh)
 
 A JupiterOne integration ingests information such as configurations and other
 metadata about digital and physical assets belonging to an organization. The
@@ -163,7 +163,3 @@ yarn test
 Managed integrations are deployed into the JupiterOne infrastructure by staff
 engineers using internal projects that declare a dependency on the open source
 integration NPM package. The package will be published by the JupiterOne team.
-
-```sh
-yarn build:publish
-```

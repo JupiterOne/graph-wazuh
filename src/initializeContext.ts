@@ -1,35 +1,21 @@
 import {
   GraphClient,
   IntegrationExecutionContext,
-  IntegrationInstanceConfigError,
-  IntegrationInvocationEvent,
   PersisterClient,
 } from "@jupiterone/jupiter-managed-integration-sdk";
+
 import { ProviderClient } from "./provider";
 
-export interface WazuhExecutionContext
-  extends IntegrationExecutionContext<IntegrationInvocationEvent> {
+export interface WazuhExecutionContext extends IntegrationExecutionContext {
   graph: GraphClient;
   persister: PersisterClient;
   provider: ProviderClient;
 }
 
 export default function initializeContext(
-  context: IntegrationExecutionContext<IntegrationInvocationEvent>,
+  context: IntegrationExecutionContext,
 ): WazuhExecutionContext {
   const config = context.instance.config;
-
-  if (!config) {
-    throw new Error(
-      "Provider config must be provided by the exectution environment",
-    );
-  }
-
-  if (!config.username || !config.password || !config.managerUrl) {
-    throw new IntegrationInstanceConfigError(
-      "Config requires username, password, and managerUrl",
-    );
-  }
 
   return {
     ...context,
