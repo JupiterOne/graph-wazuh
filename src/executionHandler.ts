@@ -1,7 +1,6 @@
 import {
   IntegrationExecutionContext,
   IntegrationExecutionResult,
-  IntegrationInvocationEvent,
 } from "@jupiterone/jupiter-managed-integration-sdk";
 
 import {
@@ -18,7 +17,7 @@ import initializeContext from "./initializeContext";
 import { WazuhManager } from "./provider";
 
 export default async function executionHandler(
-  context: IntegrationExecutionContext<IntegrationInvocationEvent>,
+  context: IntegrationExecutionContext,
 ): Promise<IntegrationExecutionResult> {
   const { graph, persister, provider } = initializeContext(context);
 

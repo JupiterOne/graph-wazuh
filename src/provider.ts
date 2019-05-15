@@ -1,4 +1,3 @@
-import { IntegrationInstanceAuthenticationError } from "@jupiterone/jupiter-managed-integration-sdk";
 import fetch from "node-fetch";
 
 export interface WazuhManager {
@@ -56,16 +55,25 @@ export class ProviderClient {
     };
   }
 
+  public async verifyAccess() {
+    const response = await fetch(
+      `${this.config.managerUrl}/manager/info`,
+      this.requestOptions,
+    );
+    if (response.status !== 200) {
+      const err = new Error(response.statusText) as any;
+      err.code = "UnexpectedStatusCode";
+      err.statusCode = response.status;
+      throw err;
+    }
+  }
+
   public async fetchManager(): Promise<WazuhManager> {
     const response = await fetch(
       `${this.config.managerUrl}/manager/info`,
       this.requestOptions,
     );
-    if (response.status === 401) {
-      throw new IntegrationInstanceAuthenticationError(
-        Error(response.statusText),
-      );
-    }
+
     const info = JSON.stringify(await response.json());
     const provider = JSON.parse(info);
     return {
@@ -84,11 +92,7 @@ export class ProviderClient {
 
   public async fetchAgents(): Promise<Agent[]> {
     const response = await fetch(`${this.config.managerUrl}/agents`);
-    if (response.status === 401) {
-      throw new IntegrationInstanceAuthenticationError(
-        Error(response.statusText),
-      );
-    }
+
     const agentInfo = JSON.parse(JSON.stringify(await response.json()));
     const agents = [];
     for (const agent of agentInfo.data.items) {

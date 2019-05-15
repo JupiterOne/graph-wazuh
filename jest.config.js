@@ -7,9 +7,9 @@ module.exports = {
   testMatch: ["<rootDir>/src/**/*.test.{js,ts}"],
   collectCoverageFrom: [
     "src/**/*.ts",
-    "!src/index.ts",
     "!src/executionHandler.ts",
-    "!src/invocationValidator.ts",
+    "!src/index.ts",
+    "!src/initializeContext.ts",
     "!src/provider.ts",
   ],
   moduleFileExtensions: [...defaults.moduleFileExtensions, "ts"],
