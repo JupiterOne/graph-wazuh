@@ -5,30 +5,33 @@ import {
 } from "@jupiterone/jupiter-managed-integration-sdk";
 
 import { default as invocationValidator } from "./invocationValidator";
-import { ProviderClient, ProviderConfig } from "./provider";
+import { WazuhClientConfig } from "./wazuh/types";
+import WazuhClient from "./wazuh/WazuhClient";
 
-jest.mock("./provider");
+jest.mock("./wazuh/WazuhClient");
 
-function resetConfig(): ProviderConfig {
+function createConfig(
+  overrides?: Partial<WazuhClientConfig>,
+): WazuhClientConfig {
   return {
-    username: process.env.WAZUH_LOCAL_EXECUTION_USERNAME || "foo",
-    password: process.env.WAZUH_LOCAL_EXECUTION_PASSWORD || "bar",
-    managerUrl:
-      process.env.WAZUH_LOCAL_EXECUTION_MANAGER_URL ||
-      "https://localhost:55000",
+    managerUrl: "https://localhost:5500",
+    password: "password",
+    username: "username",
+    ...overrides,
   };
 }
 
 test("undefined config", async () => {
   const context = createTestIntegrationExecutionContext();
   expect(context.instance.config).toBeUndefined();
-  await expect(invocationValidator(context)).rejects.toThrowError(Error);
+  await expect(invocationValidator(context)).rejects.toThrowError(
+    IntegrationInstanceConfigError,
+  );
 });
 
 test("blank username", async () => {
   const context = createTestIntegrationExecutionContext();
-  context.instance.config = resetConfig();
-  context.instance.config.username = "";
+  context.instance.config = createConfig({ username: "" });
   await expect(invocationValidator(context)).rejects.toThrowError(
     IntegrationInstanceConfigError,
   );
@@ -36,8 +39,7 @@ test("blank username", async () => {
 
 test("blank password", async () => {
   const context = createTestIntegrationExecutionContext();
-  context.instance.config = resetConfig();
-  context.instance.config.password = "";
+  context.instance.config = createConfig({ password: "" });
   await expect(invocationValidator(context)).rejects.toThrowError(
     IntegrationInstanceConfigError,
   );
@@ -45,8 +47,7 @@ test("blank password", async () => {
 
 test("blank managerUrl", async () => {
   const context = createTestIntegrationExecutionContext();
-  context.instance.config = resetConfig();
-  context.instance.config.managerUrl = "";
+  context.instance.config = createConfig({ managerUrl: "" });
 
   await expect(invocationValidator(context)).rejects.toThrowError(
     IntegrationInstanceConfigError,
@@ -55,18 +56,18 @@ test("blank managerUrl", async () => {
 
 test("complete config", async () => {
   const context = createTestIntegrationExecutionContext();
-  context.instance.config = resetConfig();
+  context.instance.config = createConfig();
   await expect(invocationValidator(context)).resolves.toBeUndefined();
-  expect(ProviderClient).toHaveBeenCalledTimes(1);
+  expect(WazuhClient).toHaveBeenCalledTimes(1);
 });
 
 test("access verification failure", async () => {
   const context = createTestIntegrationExecutionContext();
-  context.instance.config = resetConfig();
+  context.instance.config = createConfig();
 
   const verifyAccess = jest.fn().mockRejectedValue(new Error("any err"));
 
-  (ProviderClient as jest.Mock).mockImplementation(() => {
+  (WazuhClient as jest.Mock).mockImplementation(() => {
     return {
       verifyAccess,
     };

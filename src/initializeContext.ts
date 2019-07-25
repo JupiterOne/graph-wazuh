@@ -4,12 +4,12 @@ import {
   PersisterClient,
 } from "@jupiterone/jupiter-managed-integration-sdk";
 
-import { ProviderClient } from "./provider";
+import WazuhClient from "./wazuh/WazuhClient";
 
 export interface WazuhExecutionContext extends IntegrationExecutionContext {
   graph: GraphClient;
   persister: PersisterClient;
-  provider: ProviderClient;
+  wazuh: WazuhClient;
 }
 
 export default function initializeContext(
@@ -20,6 +20,6 @@ export default function initializeContext(
   return {
     ...context,
     ...context.clients.getClients(),
-    provider: new ProviderClient(config),
+    wazuh: new WazuhClient(config),
   };
 }
