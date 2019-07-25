@@ -1,21 +1,22 @@
 import {
   EntityFromIntegration,
+  IntegrationInstance,
   RelationshipFromIntegration,
 } from "@jupiterone/jupiter-managed-integration-sdk";
-import { Agent, WazuhManager } from "./provider";
+
 import getTime from "./utils/getTime";
+import { WazuhAgent, WazuhManager } from "./wazuh/types";
 
 export const WAZUH_MANAGER_ENTITY_TYPE = "wazuh_manager";
 export const WAZUH_MANAGER_ENTITY_CLASS = ["Service", "Control"];
 
-export const AGENT_ENTITY_TYPE = "wazuh_agent";
+export const WAZUH_AGENT_ENTITY_TYPE = "wazuh_agent";
 export const AGENT_ENTITY_CLASS = "HostAgent";
 
 export const WAZUH_MANAGER_AGENT_RELATIONSHIP_TYPE = "wazuh_manager_has_agent";
 export const WAZUH_MANAGER_AGENT_RELATIONSHIP_CLASS = "HAS";
 
 export interface WazuhManagerEntity extends EntityFromIntegration {
-  id: string;
   compilationDate: number;
   version: string;
   opensslSupport: string;
@@ -25,96 +26,78 @@ export interface WazuhManagerEntity extends EntityFromIntegration {
   tzName: string;
   type: string;
   tzOffset: string;
-  managerId: string;
 }
 
-export interface AgentEntity extends EntityFromIntegration {
+export interface WazuhAgentEntity extends EntityFromIntegration {
+  agentId: string;
   status: string;
   name: string;
   ip: string;
   manager?: string;
   nodeName: string;
   dateAdd: number;
+  createdOn: number;
   version?: string;
-  lastKeepAlive?: number;
-  osMajor: string;
-  osName: string;
-  osUname: string;
-  osPlatform: string;
-  osVersion: string;
-  osCodename: string;
-  osArch: string;
-  osMinor: string;
-  id: string;
-  ownerId: string;
+  osMajor?: string;
+  osName?: string;
+  osUname?: string;
+  osPlatform?: string;
+  osVersion?: string;
+  osCodename?: string;
+  osArch?: string;
+  osMinor?: string;
 }
 
-export function createWazuhManagerEntities(
+export function createWazuhManagerEntity(
+  instance: IntegrationInstance,
   data: WazuhManager,
 ): WazuhManagerEntity {
   return {
-    _key: `${WAZUH_MANAGER_ENTITY_TYPE}-${data.id}`,
+    _key: `${WAZUH_MANAGER_ENTITY_TYPE}_${instance.id}`,
     _type: WAZUH_MANAGER_ENTITY_TYPE,
     _class: WAZUH_MANAGER_ENTITY_CLASS,
-    managerId: data.id,
     displayName: `${data.type} ${data.version}`,
-    id: data.id,
-    compilationDate: getTime(data.compilationDate)!,
+    compilationDate: getTime(data.compilation_date)!,
     version: data.version,
-    opensslSupport: data.opensslSupport,
-    maxAgents: data.maxAgents,
-    rulesetVersion: data.rulesetVersion,
+    opensslSupport: data.openssl_support,
+    maxAgents: data.max_agents,
+    rulesetVersion: data.ruleset_version,
     path: data.path,
-    tzName: data.tzName,
+    tzName: data.tz_name,
     type: data.type,
-    tzOffset: data.tzOffset,
+    tzOffset: data.tz_offset,
   };
 }
 
-export function createAgentEntities(data: Agent[]): AgentEntity[] {
-  return data.map(d => ({
-    _key: `${AGENT_ENTITY_TYPE}-id-${d.id}`,
-    _type: AGENT_ENTITY_TYPE,
+export function createAgentEntity(data: WazuhAgent): WazuhAgentEntity {
+  return {
+    _key: `${WAZUH_AGENT_ENTITY_TYPE}_${data.id}`,
+    _type: WAZUH_AGENT_ENTITY_TYPE,
     _class: AGENT_ENTITY_CLASS,
-    agentId: d.id,
-    ownerId: d.ownerId,
-    displayName: `${d.name}: ${d.nodeName}`,
-    status: d.status,
-    name: d.name,
-    ip: d.ip,
-    manager: d.manager,
-    nodeName: d.nodeName,
-    dateAdd: getTime(d.dateAdd)!,
-    version: d.version,
-    lastKeepAlive: getTime(d.lastKeepAlive),
-    osMajor: d.osMajor,
-    osName: d.osName,
-    osUname: d.osUname,
-    osPlatform: d.osPlatform,
-    osVersion: d.osVersion,
-    osCodename: d.osCodename,
-    osArch: d.osArch,
-    osMinor: d.osMinor,
-    id: d.id,
-  }));
+    agentId: data.id,
+    displayName: `${data.name}: ${data.node_name}`,
+    status: data.status,
+    name: data.name,
+    ip: data.ip,
+    manager: data.manager,
+    nodeName: data.node_name,
+    dateAdd: getTime(data.dateAdd)!,
+    createdOn: getTime(data.dateAdd)!,
+    version: data.version,
+    osPlatform: data.os && data.os.platform,
+    osName: data.os && data.os.name,
+    osUname: data.os && data.os.uname,
+    osMajor: data.os && data.os.major,
+    osMinor: data.os && data.os.minor,
+    osVersion: data.os && data.os.version,
+    osCodename: data.os && data.os.codename,
+    osArch: data.os && data.os.arch,
+  };
 }
 
-export function createWazuhManagerAgentRelationships(
+export function createWazuhManagerAgentRelationship(
   manager: WazuhManagerEntity,
-  agents: AgentEntity[],
-) {
-  const relationships = [];
-  for (const agent of agents) {
-    agent.ownerId = manager.managerId;
-    relationships.push(createWazuhManagerAgentRelationship(manager, agent));
-  }
-
-  return relationships;
-}
-
-function createWazuhManagerAgentRelationship(
-  manager: WazuhManagerEntity,
-  agent: AgentEntity,
+  agent: WazuhAgentEntity,
 ): RelationshipFromIntegration {
   return {
     _key: `${manager._key}_has_${agent._key}`,

@@ -4,7 +4,7 @@ import {
   IntegrationValidationContext,
 } from "@jupiterone/jupiter-managed-integration-sdk";
 
-import { ProviderClient } from "./provider";
+import WazuhClient from "./wazuh/WazuhClient";
 
 /**
  * Performs validation of the execution before the execution handler function is
@@ -27,8 +27,8 @@ export default async function invocationValidator(
   const config = context.instance.config;
 
   if (!config) {
-    throw new Error(
-      "Provider config must be provided by the exectution environment",
+    throw new IntegrationInstanceConfigError(
+      "Missing integration configuration",
     );
   }
 
@@ -38,9 +38,9 @@ export default async function invocationValidator(
     );
   }
 
-  const provider = new ProviderClient(config);
+  const wazuhClient = new WazuhClient(config);
   try {
-    await provider.verifyAccess();
+    await wazuhClient.verifyAccess();
   } catch (err) {
     throw new IntegrationInstanceAuthenticationError(err);
   }

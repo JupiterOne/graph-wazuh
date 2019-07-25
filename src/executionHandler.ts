@@ -4,22 +4,22 @@ import {
 } from "@jupiterone/jupiter-managed-integration-sdk";
 
 import {
-  AGENT_ENTITY_TYPE,
-  AgentEntity,
-  createAgentEntities,
-  createWazuhManagerAgentRelationships,
-  createWazuhManagerEntities,
+  createAgentEntity,
+  createWazuhManagerAgentRelationship,
+  createWazuhManagerEntity,
+  WAZUH_AGENT_ENTITY_TYPE,
   WAZUH_MANAGER_AGENT_RELATIONSHIP_TYPE,
   WAZUH_MANAGER_ENTITY_TYPE,
+  WazuhAgentEntity,
   WazuhManagerEntity,
 } from "./converters";
 import initializeContext from "./initializeContext";
-import { WazuhManager } from "./provider";
+import { WazuhManager } from "./wazuh/types";
 
 export default async function executionHandler(
   context: IntegrationExecutionContext,
 ): Promise<IntegrationExecutionResult> {
-  const { graph, persister, provider } = initializeContext(context);
+  const { graph, persister, wazuh } = initializeContext(context);
 
   const [
     oldManagerEntities,
@@ -27,15 +27,19 @@ export default async function executionHandler(
     oldManagerAgentRelationships,
   ] = await Promise.all([
     graph.findEntitiesByType<WazuhManagerEntity>(WAZUH_MANAGER_ENTITY_TYPE),
-    graph.findEntitiesByType<AgentEntity>(AGENT_ENTITY_TYPE),
+    graph.findEntitiesByType<WazuhAgentEntity>(WAZUH_AGENT_ENTITY_TYPE),
     graph.findRelationshipsByType(WAZUH_MANAGER_AGENT_RELATIONSHIP_TYPE),
   ]);
 
-  const manager: WazuhManager = await provider.fetchManager();
-  manager.id = context.instance.id;
-  const managerEntity: WazuhManagerEntity = createWazuhManagerEntities(manager);
-  const agentEntities: AgentEntity[] = createAgentEntities(
-    await provider.fetchAgents(),
+  const manager: WazuhManager = await wazuh.fetchManager();
+  const managerEntity: WazuhManagerEntity = createWazuhManagerEntity(
+    context.instance,
+    manager,
+  );
+
+  const agentEntities = (await wazuh.fetchAgents()).map(createAgentEntity);
+  const managerAgentRelationships = agentEntities.map(e =>
+    createWazuhManagerAgentRelationship(managerEntity, e),
   );
 
   return {
@@ -44,12 +48,10 @@ export default async function executionHandler(
         ...persister.processEntities(oldManagerEntities, [managerEntity]),
         ...persister.processEntities(oldAgentEntities, agentEntities),
       ],
-      [
-        ...persister.processRelationships(
-          oldManagerAgentRelationships,
-          createWazuhManagerAgentRelationships(managerEntity, agentEntities),
-        ),
-      ],
+      persister.processRelationships(
+        oldManagerAgentRelationships,
+        managerAgentRelationships,
+      ),
     ]),
   };
 }
