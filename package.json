@@ -1,5 +1,5 @@
 {
-  "name": "@jupiterone/jupiter-integration-wazuh",
+  "name": "@jupiterone/graph-wazuh",
   "version": "1.0.5",
   "description": "A JupiterOne managed integration for https://wazuh.com",
   "main": "dist/index.js",
