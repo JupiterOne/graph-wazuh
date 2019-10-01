@@ -3,7 +3,7 @@
   "version": "1.0.5",
   "description": "A JupiterOne managed integration for https://wazuh.com",
   "main": "dist/index.js",
-  "repository": "https://github.com/jupiterone/jupiter-integration-wazuh",
+  "repository": "https://github.com/jupiterone/graph-wazuh",
   "license": "SEE LICENSE IN LICENSE",
   "files": [
     "LICENSE",
