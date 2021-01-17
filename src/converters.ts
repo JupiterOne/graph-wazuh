@@ -1,6 +1,5 @@
 import {
   EntityFromIntegration,
-  IntegrationInstance,
   RelationshipFromIntegration,
 } from "@jupiterone/jupiter-managed-integration-sdk";
 
@@ -49,7 +48,7 @@ export interface WazuhAgentEntity extends EntityFromIntegration {
 }
 
 export function createWazuhManagerEntity(
-  instance: IntegrationInstance,
+  instance: { id: string }, // integration instance
   data: WazuhManager,
 ): WazuhManagerEntity {
   return {

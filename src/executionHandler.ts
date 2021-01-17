@@ -45,13 +45,19 @@ export default async function executionHandler(
   return {
     operations: await persister.publishPersisterOperations([
       [
-        ...persister.processEntities(oldManagerEntities, [managerEntity]),
-        ...persister.processEntities(oldAgentEntities, agentEntities),
+        ...persister.processEntities({
+          oldEntities: oldManagerEntities,
+          newEntities: [managerEntity],
+        }),
+        ...persister.processEntities({
+          oldEntities: oldAgentEntities,
+          newEntities: agentEntities,
+        }),
       ],
-      persister.processRelationships(
-        oldManagerAgentRelationships,
-        managerAgentRelationships,
-      ),
+      persister.processRelationships({
+        oldRelationships: oldManagerAgentRelationships,
+        newRelationships: managerAgentRelationships,
+      }),
     ]),
   };
 }
