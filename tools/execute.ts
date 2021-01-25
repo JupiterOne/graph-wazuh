@@ -1,4 +1,6 @@
 /* tslint:disable:no-console */
+process.env.JUPITERONE_RUNTIME_ENVIRONMENT = "LOCAL";
+
 import { executeIntegrationLocal } from "@jupiterone/jupiter-managed-integration-sdk";
 import invocationConfig from "../src/index";
 

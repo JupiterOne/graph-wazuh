@@ -1,6 +1,6 @@
 {
   "name": "@jupiterone/graph-wazuh",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "A JupiterOne managed integration for https://wazuh.com",
   "main": "dist/index.js",
   "repository": "https://github.com/jupiterone/graph-wazuh",
@@ -28,7 +28,8 @@
     "test": "jest"
   },
   "dependencies": {
-    "@jupiterone/jupiter-managed-integration-sdk": "^33.7.5",
+    "@jupiterone/jupiter-managed-integration-sdk": "^36.0.1",
+    "aws-sdk": "^2.828.0",
     "node-fetch": "^2.3.0"
   },
   "devDependencies": {
