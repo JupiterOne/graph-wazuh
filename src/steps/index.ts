@@ -1,0 +1,3 @@
+const integrationSteps = [];
+
+export { integrationSteps };

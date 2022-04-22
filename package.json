@@ -1,94 +1,44 @@
 {
   "name": "@jupiterone/graph-wazuh",
   "version": "1.0.10",
-  "description": "A JupiterOne managed integration for https://wazuh.com",
-  "main": "dist/index.js",
-  "repository": "https://github.com/jupiterone/graph-wazuh",
-  "license": "SEE LICENSE IN LICENSE",
+  "description": "A JupiterOne Integration",
+  "license": "MPL-2.0",
+  "main": "src/index.js",
+  "types": "src/index.d.ts",
   "files": [
-    "LICENSE",
-    "dist"
+    "src",
+    "jupiterone"
   ],
   "publishConfig": {
     "access": "public"
   },
   "scripts": {
-    "start": "ts-node --require dotenv/config tools/execute.ts | bunyan",
-    "start:graph": "docker run -d --rm --name jupiterone-local-graph -p 8182:8182 tinkerpop/gremlin-server:3.3",
-    "stop:graph": "docker stop jupiterone-local-graph",
-    "prebuild": "yarn test",
-    "build": "rm -rf dist/* && yarn build:types && yarn build:src && yarn build:docs",
-    "build:src": "babel src --extensions '.ts' --out-dir dist",
-    "build:docs": "ts-node tools/docs.ts",
-    "build:types": "tsc --project tsconfig.dist.json --declaration --emitDeclarationOnly",
-    "lint": "yarn lint:ts && yarn lint:md",
-    "lint:md": "remark .",
-    "lint:ts": "tslint --project .",
-    "format": "yarn prettier --write '**/*.{ts,js,json,md}'",
-    "prepack": "yarn build",
-    "test": "jest"
+    "start": "j1-integration collect",
+    "graph": "j1-integration visualize",
+    "graph:types": "j1-integration visualize-types",
+    "graph:spec": "j1-integration visualize-types --project-path docs/spec --output-file ./.j1-integration/types-graph/index.spec.html",
+    "validate:questions:dry": "j1-integration validate-question-file --dry-run",
+    "validate:questions": "j1-integration validate-question-file -a $MANAGED_QUESTIONS_JUPITERONE_ACCOUNT_ID -k $MANAGED_QUESTIONS_JUPITERONE_API_KEY",
+    "lint": "eslint . --cache --fix --ext .ts,.tsx",
+    "format": "prettier --write '**/*.{ts,js,json,css,md,yml}'",
+    "format:check": "prettier --check '**/*.{ts,js,json,css,md,yml}'",
+    "type-check": "tsc",
+    "test": "jest",
+    "test:env": "LOAD_ENV=1 yarn test",
+    "test:ci": "yarn format:check && yarn lint && yarn type-check && yarn test",
+    "build": "tsc -p tsconfig.dist.json --declaration && cp README.md dist/README.md && cp -r jupiterone/ dist/jupiterone/",
+    "prepush": "yarn format:check && yarn lint && yarn type-check && jest --changedSince main"
   },
-  "dependencies": {
-    "@jupiterone/jupiter-managed-integration-sdk": "^36.0.1",
-    "aws-sdk": "^2.828.0",
-    "node-fetch": "^2.3.0"
+  "peerDependencies": {
+    "@jupiterone/integration-sdk-core": "^8.8.0"
   },
   "devDependencies": {
-    "@babel/cli": "^7.2.3",
-    "@babel/core": "^7.2.2",
-    "@babel/plugin-proposal-class-properties": "^7.3.4",
-    "@babel/plugin-proposal-object-rest-spread": "^7.3.4",
-    "@babel/preset-env": "^7.3.1",
-    "@babel/preset-typescript": "^7.1.0",
-    "@types/bunyan": "^1.8.5",
-    "@types/fs-extra": "^5.0.5",
-    "@types/gremlin": "^3.4.2",
-    "@types/jest": "^24.0.0",
-    "@types/node": "^10.12.20",
-    "@types/node-fetch": "^2.1.7",
-    "@types/request": "^2.48.1",
-    "bunyan": "^1.8.12",
-    "dotenv": "^7.0.0",
-    "fs-extra": "^7.0.1",
-    "husky": "^1.3.1",
-    "jest": "^24.0.0",
-    "jest-haste-map": "^24.0.0",
-    "jest-resolve": "^24.1.0",
-    "lint-staged": "^8.1.3",
-    "prettier": "1.16.4",
-    "remark-cli": "^6.0.1",
-    "remark-lint": "^6.0.4",
-    "remark-preset-lint-consistent": "^2.0.2",
-    "remark-preset-lint-markdown-style-guide": "^2.1.2",
-    "remark-preset-lint-recommended": "^3.0.2",
-    "ts-jest": "^24.0.0",
-    "ts-node": "^8.1.0",
-    "tslint": "^5.12.1",
-    "tslint-config-prettier": "^1.18.0",
-    "typescript": "^3.8.3"
+    "@jupiterone/integration-sdk-core": "^8.12.0",
+    "@jupiterone/integration-sdk-dev-tools": "^8.12.0",
+    "@jupiterone/integration-sdk-testing": "^8.12.0"
   },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
-    }
-  },
-  "lint-staged": {
-    "linters": {
-      "*.md": [
-        "remark .",
-        "prettier --write",
-        "git add"
-      ],
-      "*.ts": [
-        "tslint --project .",
-        "prettier --write",
-        "git add"
-      ],
-      "*.{js,json}": [
-        "prettier --write",
-        "git add"
-      ]
-    },
-    "ignore": []
+  "dependencies": {
+    "add": "^2.0.6",
+    "yarn": "^1.22.18"
   }
 }

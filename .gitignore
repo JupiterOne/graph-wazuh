@@ -1,6 +1,7 @@
 node_modules/
-build/
-coverage/
 dist/
-yarn-error.log
+.j1-integration/
+.j1-integration-cache/
 .env
+.eslintcache
+tsconfig.tsbuildinfo
