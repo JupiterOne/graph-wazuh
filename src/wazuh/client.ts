@@ -1,34 +1,32 @@
-import fetch, { Request, RequestInit } from "node-fetch";
+import { IntegrationProviderAPIError } from '@jupiterone/integration-sdk-core';
+import fetch, { RequestInit } from 'node-fetch';
+import { WazuhAgent, WazuhClientConfig, WazuhManager } from './types';
 
-import { IntegrationError } from "@jupiterone/jupiter-managed-integration-sdk";
-
-import { WazuhAgent, WazuhClientConfig, WazuhManager } from "./types";
-
-export default class WazuhClient {
-  private requestOptions: object;
+export class WazuhClient {
+  private requestOptions: RequestInit;
 
   constructor(readonly config: WazuhClientConfig) {
     const authorization = Buffer.from(
       `${config.username}:${config.password}`,
-    ).toString("base64");
+    ).toString('base64');
     this.requestOptions = {
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
         Authorization: `Basic ${authorization}`,
       },
     };
   }
 
   public async verifyAccess() {
-    return this.fetchData("/manager/info");
+    return this.fetchData('/manager/info');
   }
 
   public async fetchManager(): Promise<WazuhManager> {
-    return this.fetchData<WazuhManager>("/manager/info");
+    return this.fetchData<WazuhManager>('/manager/info');
   }
 
   public async fetchAgents(): Promise<WazuhAgent[]> {
-    return this.fetchDataItems<WazuhAgent[]>("/agents");
+    return this.fetchDataItems<WazuhAgent[]>('/agents');
   }
 
   private async fetchData<T>(path: string): Promise<T> {
@@ -44,13 +42,13 @@ export default class WazuhClient {
   }
 }
 
-async function makeRequest<T>(url: string | Request, init?: RequestInit) {
+async function makeRequest<T>(url: string, init?: RequestInit): Promise<any> {
   const response = await fetch(url, init);
   if (response.status >= 400) {
-    throw new IntegrationError({
-      expose: true,
-      message: response.statusText,
-      statusCode: response.status,
+    throw new IntegrationProviderAPIError({
+      endpoint: url,
+      statusText: response.statusText,
+      status: response.status,
     });
   } else {
     return response.json();
