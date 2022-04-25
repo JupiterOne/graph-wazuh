@@ -7,3 +7,10 @@ and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## 2.0.0 - 2022-04-25
+
+### Changed
+
+- Updated to use `@jupiterone/integration-sdk-*` version 8
+- Updated project to match patterns in `integration-template`
