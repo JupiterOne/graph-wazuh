@@ -35,10 +35,12 @@
   "devDependencies": {
     "@jupiterone/integration-sdk-core": "^8.12.0",
     "@jupiterone/integration-sdk-dev-tools": "^8.12.0",
-    "@jupiterone/integration-sdk-testing": "^8.12.0"
+    "@jupiterone/integration-sdk-testing": "^8.12.0",
+    "@types/node-fetch": "^2.6.1"
   },
   "dependencies": {
     "add": "^2.0.6",
+    "node-fetch": "^2",
     "yarn": "^1.22.18"
   }
 }

@@ -2,7 +2,10 @@ import {
   IntegrationExecutionContext,
   IntegrationInstanceConfigFieldMap,
   IntegrationInstanceConfig,
+  IntegrationValidationError,
+  IntegrationProviderAuthorizationError,
 } from '@jupiterone/integration-sdk-core';
+import { WazuhClient } from './wazuh/client';
 
 /**
  * A type describing the configuration fields required to execute the
@@ -18,14 +21,49 @@ import {
  * managed environment. For example, in JupiterOne, users configure
  * `instance.config` in a UI.
  */
-export const instanceConfigFields: IntegrationInstanceConfigFieldMap = {};
+export const instanceConfigFields: IntegrationInstanceConfigFieldMap = {
+  username: {
+    type: 'string',
+  },
+  password: {
+    type: 'string',
+    mask: true,
+  },
+  managerUrl: {
+    type: 'string',
+  },
+};
 
 /**
  * Properties provided by the `IntegrationInstance.config`. This reflects the
  * same properties defined by `instanceConfigFields`.
  */
-export interface IntegrationConfig extends IntegrationInstanceConfig {}
+export interface IntegrationConfig extends IntegrationInstanceConfig {
+  username: string;
+  password: string;
+  managerUrl: string;
+}
 
 export async function validateInvocation(
   context: IntegrationExecutionContext<IntegrationConfig>,
-) {}
+) {
+  const config = context.instance.config;
+
+  if (!config.username || !config.password || !config.managerUrl) {
+    throw new IntegrationValidationError(
+      'Config requires all of {username, password, managerUrl}',
+    );
+  }
+
+  const wazuhClient = new WazuhClient({
+    username: config.username,
+    password: config.password,
+    managerUrl: config.managerUrl,
+  });
+
+  try {
+    await wazuhClient.verifyAccess();
+  } catch (err) {
+    throw new IntegrationProviderAuthorizationError(err);
+  }
+}
