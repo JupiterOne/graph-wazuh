@@ -1,15 +1,18 @@
 ---
 sourceId: managed:template
 integrationDefinitionId: '${integration_definition_id}'
-questions: []
-  # - id: integration-question-template-replace-me
-  #   title: What kinds of questions will this integration support?
-  #   description:
-  #     TODO Every integration should contribute questions! Please be carefule
-  #     to replace this before deploying the integration to JupiterOne.
-  #   queries:
-  #     - name: good
-  #       query: |
-  #         find * with _integrationDefinitionId = '${integration_definition_id}'
-  #   tags:
-  #     - template
+questions:
+- id: managed-question-endpoint-wazuh-manager-agent
+  title: Which Wazuh managers have an associated agent?
+  description: Return a list of Wazuh managers that have an agent.
+  queries:
+  - query: |
+      FIND wazuh_manager AS m
+        THAT HAS wazuh_agent AS a
+        RETURN
+          m.displayName AS Manager, m.version AS ManagerVersion, m.maxAgents AS ManagerMaxAgents, m.type AS ManagerType
+          a.displayName AS Agent, a.status AS AgentStatus, a.agentID AS AgentID, a.createdOn AS AgentCreatedOnDate
+  tags:
+  - wazuh
+  - device
+  - endpoint
