@@ -10,7 +10,7 @@ questions:
       FIND wazuh_manager AS m
         THAT HAS wazuh_agent AS a
         RETURN
-          m.displayName AS Manager, m.version AS ManagerVersion, m.maxAgents AS ManagerMaxAgents, m.type AS ManagerType
+          m.displayName AS Manager, m.version AS ManagerVersion, m.maxAgents AS ManagerMaxAgents, m.type AS ManagerType,
           a.displayName AS Agent, a.status AS AgentStatus, a.agentID AS AgentID, a.createdOn AS AgentCreatedOnDate
   tags:
   - wazuh
