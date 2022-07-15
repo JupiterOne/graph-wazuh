@@ -8,6 +8,7 @@ export const Steps = {
   MANAGER: 'fetch-manager',
   AGENTS: 'fetch-agents',
   MANAGER_AGENT_RELATIONSHIPS: 'build-manager-agent-relationships',
+  CLEANUP_WAZUH_CLIENT: 'cleanup-wazuh-client',
 };
 
 export const Entities: Record<'MANAGER' | 'AGENT', StepEntityMetadata> = {

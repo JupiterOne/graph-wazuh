@@ -5,7 +5,7 @@ import {
   IntegrationValidationError,
   IntegrationProviderAuthorizationError,
 } from '@jupiterone/integration-sdk-core';
-import { WazuhClient } from './wazuh/client';
+import { wazuhClient } from './wazuh/client';
 
 /**
  * A type describing the configuration fields required to execute the
@@ -55,13 +55,12 @@ export async function validateInvocation(
     );
   }
 
-  const wazuhClient = new WazuhClient({
-    username: config.username,
-    password: config.password,
-    managerUrl: config.managerUrl,
-  });
-
   try {
+    await wazuhClient.configure({
+      username: config.username,
+      password: config.password,
+      managerUrl: config.managerUrl,
+    });
     await wazuhClient.verifyAccess();
   } catch (err) {
     throw new IntegrationProviderAuthorizationError(err);

@@ -4,6 +4,10 @@ export interface WazuhClientConfig {
   managerUrl: string;
 }
 
+export interface WazuhAuth {
+  token: string;
+}
+
 export interface WazuhManager {
   compilation_date: string;
   version: string;

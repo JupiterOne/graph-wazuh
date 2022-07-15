@@ -1,28 +1,30 @@
 # Development
 
-Add details here to give a brief overview of how to work with the provider APIs.
-Please reference any SDKs or API docs used to help build the integration here.
+## Provider Account Setup
 
-## Prerequisites
+You will need to have a wazuh server in order to test against a live backend.
+While this can be done on-prem following
+[these instructions](https://documentation.wazuh.com/current/installation-guide/wazuh-server/index.html)
+it is much easier to use
+[Wazuh Cloud](https://documentation.wazuh.com/current/cloud-service/getting-started/index.html).
 
-Supply details about software or tooling (like maybe Docker or Terraform) that
-is needed for development here.
+### Wazuh Cloud Instructions (WIP)
 
-Please supply references to documentation that details how to install those
-dependencies here.
+- sign up for a trial (or login to existing trial if you have it) and
+  [create an environment](https://documentation.wazuh.com/current/cloud-service/getting-started/sign-up-trial.html#create-environment)
+- view your new environment at
+  `https://console.cloud.wazuh.com/console/environments/${environmentId}` and
+  get the `default credentials` so you can log in.
+- log into your new environment and
+  [register agents](https://documentation.wazuh.com/current/cloud-service/getting-started/register-agents.html)
+  and generate other test data you desire.
+- while you will be able to use the Wazuh Api inside of your cloud environment,
+  [it is not exposed by default](https://documentation.wazuh.com/4.3/cloud-service/your-environment/technical-faq.html#do-i-have-access-to-wazuh-api).
+  You will need to reach out to support in your cloud console to have them to
+  enable api exposure. They will ask for IPs to whitelist. Recommended you
+  supply IPs of NATs if you are looking to hit this cloud environment from
+  within private subnets of a VPC of your own. The IP they provide you is your
+  `MANAGER_URL`
 
-Tools like Node.js and NPM are already covered in the [README](../README.md) so
-don't bother documenting that here.
-
-## Provider account setup
-
-Please provide information about the steps needed to create an account with a
-provider. Images and references to a provider's documentation is very helpful
-for new developers picking up your work.
-
-## Authentication
-
-Supply details here for information on how to authenticate with a provider so
-that developers have an idea of what's needed to hit APIs. It may be useful to
-provide explanations for each value specified in the
-[`IntegrationInstanceConfigFieldMap`](../src/config.ts).
+username: cloud environment admin username password: cloud environment admin
+password manager_url: ip provided from wazuh support
