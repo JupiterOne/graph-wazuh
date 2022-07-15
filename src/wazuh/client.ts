@@ -1,20 +1,59 @@
 import { IntegrationProviderAPIError } from '@jupiterone/integration-sdk-core';
 import fetch, { RequestInit } from 'node-fetch';
-import { WazuhAgent, WazuhClientConfig, WazuhManager } from './types';
+import {
+  WazuhAgent,
+  WazuhAuth,
+  WazuhClientConfig,
+  WazuhManager,
+} from './types';
 
-export class WazuhClient {
+class WazuhClient {
   private requestOptions: RequestInit;
 
-  constructor(readonly config: WazuhClientConfig) {
-    const authorization = Buffer.from(
+  private config: WazuhClientConfig;
+
+  private refreshAuthInterval: NodeJS.Timer;
+
+  constructor() {
+    // https://documentation.wazuh.com/current/user-manual/api/reference.html#section/
+    // jwt expires every 900 seconds
+    this.refreshAuthInterval = setInterval(async () => {
+      await makeRequest(`${this.config.managerUrl}/security/config`, {
+        ...this.requestOptions,
+        method: 'POST',
+        body: JSON.stringify({
+          auth_token_exp_timeout: 900,
+        }),
+      });
+    }, 800000);
+  }
+
+  public async configure(config: WazuhClientConfig) {
+    this.config = config;
+    const basicAuthorization = Buffer.from(
       `${config.username}:${config.password}`,
     ).toString('base64');
+    const basicRequestOptions = {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Basic ${basicAuthorization}`,
+      },
+    };
+    const authenticateResponse = await this.fetchData<WazuhAuth>(
+      '/security/user/authenticate',
+      basicRequestOptions,
+    );
+    const jwtToken = authenticateResponse?.token;
     this.requestOptions = {
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Basic ${authorization}`,
+        Authorization: `Bearer ${jwtToken}`,
       },
     };
+  }
+
+  public destroy() {
+    clearInterval(this.refreshAuthInterval);
   }
 
   public async verifyAccess() {
@@ -29,10 +68,13 @@ export class WazuhClient {
     return this.fetchDataItems<WazuhAgent[]>('/agents');
   }
 
-  private async fetchData<T>(path: string): Promise<T> {
+  private async fetchData<T>(
+    path: string,
+    requestOptionsOverride?: RequestInit,
+  ): Promise<T> {
     const json = await makeRequest(
       `${this.config.managerUrl}${path}`,
-      this.requestOptions,
+      requestOptionsOverride ? requestOptionsOverride : this.requestOptions,
     );
     return json.data;
   }
@@ -54,3 +96,5 @@ async function makeRequest<T>(url: string, init?: RequestInit): Promise<any> {
     return response.json();
   }
 }
+
+export const wazuhClient = new WazuhClient();

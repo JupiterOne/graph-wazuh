@@ -1,6 +1,11 @@
 import { IntegrationValidationError } from '@jupiterone/integration-sdk-core';
 import { createMockExecutionContext } from '@jupiterone/integration-sdk-testing';
 import { validateInvocation } from './config';
+import { wazuhClient } from './wazuh/client';
+
+afterAll(() => {
+  wazuhClient.destroy();
+});
 
 describe('#validateInvocation', () => {
   test.each(['username', 'password', 'managerUrl'])(
