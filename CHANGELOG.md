@@ -8,6 +8,12 @@ and this project adheres to
 
 ## [Unreleased]
 
+## 2.0.1 - 2022-07-15
+
+### Changed
+
+- fix auth (blind, still need to test in dev)
+
 ## 2.0.0 - 2022-04-25
 
 ### Changed
