@@ -8,6 +8,10 @@ and this project adheres to
 
 ## [Unreleased]
 
+## 2.0.2 - 2022-07-18
+
+- bump
+
 ## 2.0.1 - 2022-07-15
 
 ### Changed
