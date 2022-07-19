@@ -8,6 +8,12 @@ and this project adheres to
 
 ## [Unreleased]
 
+## 2.0.3 - 2022-07-18
+
+## Fixed
+
+- clear setInterval to refresh JWT token if auth fails
+
 ## 2.0.2 - 2022-07-18
 
 - bump
