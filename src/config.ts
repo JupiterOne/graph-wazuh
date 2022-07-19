@@ -63,6 +63,7 @@ export async function validateInvocation(
     });
     await wazuhClient.verifyAccess();
   } catch (err) {
+    wazuhClient.destroy();
     throw new IntegrationProviderAuthorizationError(err);
   }
 }
