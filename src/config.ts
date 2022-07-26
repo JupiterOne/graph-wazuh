@@ -63,6 +63,9 @@ export async function validateInvocation(
     });
     await wazuhClient.verifyAccess();
   } catch (err) {
+    console.error('auth debug start');
+    console.error(err);
+    console.error('auth debug end');
     wazuhClient.destroy();
     throw new IntegrationProviderAuthorizationError(err);
   }
