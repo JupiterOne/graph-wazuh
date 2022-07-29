@@ -2,6 +2,7 @@ export interface WazuhClientConfig {
   username: string;
   password: string;
   managerUrl: string;
+  selfSignedCert?: boolean;
 }
 
 export interface WazuhAuth {

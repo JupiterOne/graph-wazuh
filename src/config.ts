@@ -5,6 +5,7 @@ import {
   IntegrationValidationError,
   IntegrationProviderAuthorizationError,
 } from '@jupiterone/integration-sdk-core';
+import { FetchError } from 'node-fetch';
 import { wazuhClient } from './wazuh/client';
 
 /**
@@ -64,6 +65,11 @@ export async function validateInvocation(
     await wazuhClient.verifyAccess();
   } catch (err) {
     wazuhClient.destroy();
-    throw new IntegrationProviderAuthorizationError(err);
+    throw new IntegrationProviderAuthorizationError({
+      cause: err,
+      endpoint: 'provided managerUrl',
+      status: (err as FetchError).code as string,
+      statusText: (err as FetchError).message,
+    });
   }
 }
