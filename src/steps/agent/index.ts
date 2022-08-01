@@ -6,7 +6,7 @@ import {
   RelationshipClass,
 } from '@jupiterone/integration-sdk-core';
 
-import { IntegrationConfig } from '../../config';
+import { WazuhIntegrationConfig } from '../../config';
 import { wazuhClient } from '../../wazuh/client';
 import { Entities, Relationships, Steps } from '../constants';
 import { buildManagerEntityKey } from '../manager/converter';
@@ -15,7 +15,8 @@ import { createAgentEntity } from './converter';
 export async function fetchAgents({
   instance,
   jobState,
-}: IntegrationStepExecutionContext<IntegrationConfig>) {
+  logger,
+}: IntegrationStepExecutionContext<WazuhIntegrationConfig>) {
   const agents = await wazuhClient.fetchAgents();
 
   for (const agent of agents) {
@@ -26,7 +27,7 @@ export async function fetchAgents({
 export async function buildManagerAgentRelationships({
   instance,
   jobState,
-}: IntegrationStepExecutionContext<IntegrationConfig>) {
+}: IntegrationStepExecutionContext<WazuhIntegrationConfig>) {
   const managerEntity = await jobState.findEntity(
     buildManagerEntityKey(instance.id),
   );
@@ -54,7 +55,7 @@ export async function buildManagerAgentRelationships({
   );
 }
 
-export const agentSteps: IntegrationStep<IntegrationConfig>[] = [
+export const agentSteps: IntegrationStep<WazuhIntegrationConfig>[] = [
   {
     id: Steps.AGENTS,
     name: 'Fetch Agents',

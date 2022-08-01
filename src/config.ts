@@ -39,14 +39,14 @@ export const instanceConfigFields: IntegrationInstanceConfigFieldMap = {
  * Properties provided by the `IntegrationInstance.config`. This reflects the
  * same properties defined by `instanceConfigFields`.
  */
-export interface IntegrationConfig extends IntegrationInstanceConfig {
+export interface WazuhIntegrationConfig extends IntegrationInstanceConfig {
   username: string;
   password: string;
   managerUrl: string;
 }
 
 export async function validateInvocation(
-  context: IntegrationExecutionContext<IntegrationConfig>,
+  context: IntegrationExecutionContext<WazuhIntegrationConfig>,
 ) {
   const config = context.instance.config;
 
@@ -57,11 +57,15 @@ export async function validateInvocation(
   }
 
   try {
-    await wazuhClient.configure({
-      username: config.username,
-      password: config.password,
-      managerUrl: config.managerUrl,
-    });
+    await wazuhClient.configure(
+      {
+        username: config.username,
+        password: config.password,
+        managerUrl: config.managerUrl,
+        selfSignedCert: true,
+      },
+      context.logger,
+    );
     await wazuhClient.verifyAccess();
   } catch (err) {
     wazuhClient.destroy();

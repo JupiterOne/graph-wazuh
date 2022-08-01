@@ -48,3 +48,12 @@ export interface WazuhAgent {
   mergedSum?: string;
   configSum?: string;
 }
+
+export interface WazuhResponse<T> {
+  affected_items: T[];
+  total_affected_items: number;
+  total_failed_items: number;
+  failed_items: any[];
+  message: string;
+  error: number;
+}
