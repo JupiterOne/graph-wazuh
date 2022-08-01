@@ -27,9 +27,11 @@ configuration.
 You will need to add the following to a `.env` file in the root directory of
 this project in order to run this integration against your wazuh server:
 
-- username: a user in your wazuh account that has `readonly` permission
-- password: password for that user
-- manager_url: `https://${ip_of_wazuh_server}:55000`
+```
+USERNAME: a user in your wazuh account that has readonly permission
+PASSWORD: password for that user
+MANAGER_URL: `https://${ip_of_wazuh_server}:55000`
+```
 
 > :warning: **If you are testing against a wazuh server using an self-signed
 > cert**: You must modify `src/config.ts` such that the wazuh client is
