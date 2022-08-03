@@ -13,7 +13,7 @@ export { Recording };
 
 export function setupWazuhRecording(input: SetupRecordingInput) {
   return setupRecording({
-    redactedRequestHeaders: ['x-apikeys'], // idk yet..come back
+    redactedRequestHeaders: ['x-apikeys'],
     ...input,
     mutateEntry: (entry) => {
       redact(entry);
