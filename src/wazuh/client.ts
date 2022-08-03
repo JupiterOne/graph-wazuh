@@ -1,5 +1,6 @@
 import { IntegrationProviderAPIError } from '@jupiterone/integration-sdk-core';
 import fetch, { RequestInit } from 'node-fetch';
+import * as https from 'https';
 import {
   WazuhAgent,
   WazuhAuth,
@@ -33,11 +34,15 @@ class WazuhClient {
     const basicAuthorization = Buffer.from(
       `${config.username}:${config.password}`,
     ).toString('base64');
-    const basicRequestOptions = {
+    const agent = new https.Agent({
+      rejectUnauthorized: config.selfSignedCert ? false : true,
+    });
+    const basicRequestOptions: RequestInit = {
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Basic ${basicAuthorization}`,
       },
+      agent,
     };
     const authenticateResponse = await this.fetchData<WazuhAuth>(
       '/security/user/authenticate',
@@ -49,6 +54,7 @@ class WazuhClient {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${jwtToken}`,
       },
+      agent,
     };
   }
 
