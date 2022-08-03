@@ -62,7 +62,6 @@ export async function validateInvocation(
         username: config.username,
         password: config.password,
         managerUrl: config.managerUrl,
-        selfSignedCert: true,
       },
       context.logger,
     );
