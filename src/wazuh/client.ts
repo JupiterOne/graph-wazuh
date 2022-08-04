@@ -132,9 +132,10 @@ class WazuhClient {
     if (response.error || response.failed_items.length) {
       this.logger.error(
         {
-          ...response,
-          affected_items: undefined,
-          failed_items: undefined,
+          total_affected_items: response.total_affected_items,
+          total_failed_items: response.total_failed_items,
+          message: response.message,
+          error: response.error,
         },
         'error fetching from Wazuh Api in WazuhClient#fetchData',
       );
