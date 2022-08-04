@@ -15,6 +15,7 @@ import { createAgentEntity } from './converter';
 export async function fetchAgents({
   instance,
   jobState,
+  logger,
 }: IntegrationStepExecutionContext<IntegrationConfig>) {
   const agents = await wazuhClient.fetchAgents();
 

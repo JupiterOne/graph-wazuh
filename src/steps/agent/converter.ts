@@ -32,6 +32,15 @@ export function createAgentEntity(data: WazuhAgent): Entity {
         osVersion: data.os?.version,
         osCodename: data.os?.codename,
         osArch: data.os?.arch,
+        function: [
+          'endpoint-compliance',
+          'endpoint-protection',
+          'anti-malware',
+          'FIM',
+          'log-monitor',
+          'vulnerability-detection',
+          'container-security',
+        ],
       },
     },
   });

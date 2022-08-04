@@ -8,6 +8,17 @@ and this project adheres to
 
 ## [Unreleased]
 
+## Fixed
+
+- wazuh client for agent and manager routes
+
+## Added
+
+- better error handling
+- tests for agent and manager steps
+- recordings against an real wazuh server
+- sanitization logic for said recordings
+
 ## 2.0.3 - 2022-07-18
 
 ## Fixed

@@ -18,6 +18,7 @@ export const Entities: Record<'MANAGER' | 'AGENT', StepEntityMetadata> = {
     _class: ['Service', 'Control'],
     schema: {
       properties: {
+        name: { type: 'string' },
         compilationDate: { type: 'number' },
         version: { type: 'string' },
         opensslSupport: { type: 'string' },
@@ -27,6 +28,8 @@ export const Entities: Record<'MANAGER' | 'AGENT', StepEntityMetadata> = {
         tzName: { type: 'string' },
         type: { type: 'string' },
         tzOffset: { type: 'string' },
+        category: { type: 'array' },
+        function: { type: 'array' },
       },
       required: [],
     },
@@ -53,8 +56,9 @@ export const Entities: Record<'MANAGER' | 'AGENT', StepEntityMetadata> = {
         osCodename: { type: 'string' },
         osArch: { type: 'string' },
         osMinor: { type: 'string' },
+        function: { type: 'array' },
       },
-      required: [],
+      required: ['function'],
     },
   },
 };

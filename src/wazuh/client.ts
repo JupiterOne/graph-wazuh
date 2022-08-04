@@ -1,4 +1,7 @@
-import { IntegrationProviderAPIError } from '@jupiterone/integration-sdk-core';
+import {
+  IntegrationLogger,
+  IntegrationProviderAPIError,
+} from '@jupiterone/integration-sdk-core';
 import fetch, { RequestInit } from 'node-fetch';
 import * as https from 'https';
 import {
@@ -6,6 +9,7 @@ import {
   WazuhAuth,
   WazuhClientConfig,
   WazuhManager,
+  WazuhResponse,
 } from './types';
 
 class WazuhClient {
@@ -15,22 +19,20 @@ class WazuhClient {
 
   private refreshAuthInterval: NodeJS.Timer;
 
+  private logger: IntegrationLogger;
+
+  public initialized: boolean;
+
   constructor() {
-    // https://documentation.wazuh.com/current/user-manual/api/reference.html#section/
-    // jwt expires every 900 seconds
-    this.refreshAuthInterval = setInterval(async () => {
-      await makeRequest(`${this.config.managerUrl}/security/config`, {
-        ...this.requestOptions,
-        method: 'POST',
-        body: JSON.stringify({
-          auth_token_exp_timeout: 900,
-        }),
-      });
-    }, 800000);
+    this.initialized = false;
   }
 
-  public async configure(config: WazuhClientConfig) {
+  public async configure(config: WazuhClientConfig, logger: IntegrationLogger) {
+    if (this.initialized) {
+      return;
+    }
     this.config = config;
+    this.logger = logger;
     const basicAuthorization = Buffer.from(
       `${config.username}:${config.password}`,
     ).toString('base64');
@@ -44,10 +46,7 @@ class WazuhClient {
       },
       agent,
     };
-    const authenticateResponse = await this.fetchData<WazuhAuth>(
-      '/security/user/authenticate',
-      basicRequestOptions,
-    );
+    const authenticateResponse = await this.fetchAuth(basicRequestOptions);
     const jwtToken = authenticateResponse?.token;
     this.requestOptions = {
       headers: {
@@ -56,10 +55,24 @@ class WazuhClient {
       },
       agent,
     };
+    // https://documentation.wazuh.com/current/user-manual/api/reference.html#section/Authentication
+    // jwt expires every 900 seconds
+    this.refreshAuthInterval = setInterval(async () => {
+      await makeRequest(`${this.config.managerUrl}/security/config`, {
+        ...this.requestOptions,
+        method: 'POST',
+        body: JSON.stringify({
+          auth_token_exp_timeout: 900,
+        }),
+      });
+    }, 800000);
+
+    this.initialized = true;
   }
 
   public destroy() {
     clearInterval(this.refreshAuthInterval);
+    this.initialized = false;
   }
 
   public async verifyAccess() {
@@ -67,26 +80,73 @@ class WazuhClient {
   }
 
   public async fetchManager(): Promise<WazuhManager> {
-    return this.fetchData<WazuhManager>('/manager/info');
+    const items = await this.fetchData<WazuhManager>('/manager/info');
+    if (items.length === 1) {
+      return items[0];
+    } else {
+      if (items.length) {
+        this.logger.warn(
+          {
+            managerInfo: items.map((item) => {
+              return {
+                type: item.type,
+                version: item.version,
+              };
+            }),
+          },
+          `Wazuh Api responded back with ${items.length} Managers when we only expected one. We only consumed the first one.`,
+        );
+        return items[0];
+      } else {
+        throw new IntegrationProviderAPIError({
+          endpoint: `${this.config.managerUrl}/manager/info`,
+          status: '500',
+          statusText: 'Internal Error',
+          message:
+            'empty non-error response from Wazuh API when fetching manager info',
+        });
+      }
+    }
   }
 
   public async fetchAgents(): Promise<WazuhAgent[]> {
-    return this.fetchDataItems<WazuhAgent[]>('/agents');
+    return this.fetchData<WazuhAgent>('/agents');
   }
 
-  private async fetchData<T>(
-    path: string,
-    requestOptionsOverride?: RequestInit,
-  ): Promise<T> {
+  private async fetchAuth(
+    requestOptionsOverride: RequestInit,
+  ): Promise<WazuhAuth> {
     const json = await makeRequest(
-      `${this.config.managerUrl}${path}`,
-      requestOptionsOverride ? requestOptionsOverride : this.requestOptions,
+      `${this.config.managerUrl}/security/user/authenticate`,
+      requestOptionsOverride,
     );
     return json.data;
   }
 
-  private async fetchDataItems<T>(path: string): Promise<T> {
-    return (await this.fetchData<any>(path)).items;
+  private async fetchData<T>(path: string): Promise<T[]> {
+    const json = await makeRequest(
+      `${this.config.managerUrl}${path}`,
+      this.requestOptions,
+    );
+    const response: WazuhResponse<T> = json.data;
+    if (response.error || response.failed_items.length) {
+      this.logger.error(
+        {
+          total_affected_items: response.total_affected_items,
+          total_failed_items: response.total_failed_items,
+          message: response.message,
+          error: response.error,
+        },
+        'error fetching from Wazuh Api in WazuhClient#fetchData',
+      );
+      throw new IntegrationProviderAPIError({
+        endpoint: `${this.config.managerUrl}${path}`,
+        status: '500',
+        statusText: 'Internal Error',
+        message: `Encountered error fetching data from Wazuh Api. We recieved the following message from the server: ${response.message}`,
+      });
+    }
+    return response.affected_items;
   }
 }
 

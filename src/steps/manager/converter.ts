@@ -22,6 +22,7 @@ export function createManagerEntity(
         _type: Entities.MANAGER._type,
         _class: Entities.MANAGER._class,
         displayName: `${data.type} ${data.version}`,
+        name: `${data.type} ${data.version}`,
         compilationDate: parseTimePropertyValue(data.compilation_date),
         version: data.version,
         opensslSupport: data.openssl_support,
@@ -31,6 +32,8 @@ export function createManagerEntity(
         tzName: data.tz_name,
         type: data.type,
         tzOffset: data.tz_offset,
+        category: ['security'],
+        function: ['auditing', 'monitoring', 'SIEM'],
       },
     },
   });

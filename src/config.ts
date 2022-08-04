@@ -57,11 +57,14 @@ export async function validateInvocation(
   }
 
   try {
-    await wazuhClient.configure({
-      username: config.username,
-      password: config.password,
-      managerUrl: config.managerUrl,
-    });
+    await wazuhClient.configure(
+      {
+        username: config.username,
+        password: config.password,
+        managerUrl: config.managerUrl,
+      },
+      context.logger,
+    );
     await wazuhClient.verifyAccess();
   } catch (err) {
     wazuhClient.destroy();
