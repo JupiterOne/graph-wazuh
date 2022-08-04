@@ -8,6 +8,8 @@ and this project adheres to
 
 ## [Unreleased]
 
+## 2.0.4 - 2022-08-04
+
 ## Fixed
 
 - wazuh client for agent and manager routes
