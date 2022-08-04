@@ -1,6 +1,6 @@
 import * as dotenv from 'dotenv';
 import * as path from 'path';
-import { WazuhIntegrationConfig } from '../src/config';
+import { IntegrationConfig } from '../src/config';
 
 if (process.env.LOAD_ENV) {
   dotenv.config({
@@ -8,7 +8,7 @@ if (process.env.LOAD_ENV) {
   });
 }
 
-export const config: WazuhIntegrationConfig = {
+export const config: IntegrationConfig = {
   username: process.env.USERNAME || 'username',
   password: process.env.PASSWORD || 'password',
   managerUrl: process.env.MANAGER_URL || 'https://10.55.123.46:55000',

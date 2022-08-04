@@ -5,7 +5,7 @@ import {
   setupRecording,
   SetupRecordingInput,
 } from '@jupiterone/integration-sdk-testing';
-import { WazuhIntegrationConfig } from '../src/config';
+import { IntegrationConfig } from '../src/config';
 import _ from 'lodash';
 import { wazuhClient } from '../src/wazuh/client';
 
@@ -24,7 +24,7 @@ export function setupWazuhRecording(input: SetupRecordingInput) {
 export async function configureWazuhClientWithRecording(
   directory: string,
   name: string,
-  config: WazuhIntegrationConfig,
+  config: IntegrationConfig,
 ) {
   const configurationRecording = setupWazuhRecording({
     directory,
@@ -88,7 +88,7 @@ type MatchRequestsBy =
   Required<SetupRecordingInput>['options']['matchRequestsBy'];
 
 export function getWazuhMatchRequestsBy(
-  config: WazuhIntegrationConfig,
+  config: IntegrationConfig,
   options?: MatchRequestsBy,
 ): MatchRequestsBy {
   return {

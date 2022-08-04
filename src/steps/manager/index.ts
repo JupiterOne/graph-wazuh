@@ -3,7 +3,7 @@ import {
   IntegrationStepExecutionContext,
 } from '@jupiterone/integration-sdk-core';
 
-import { WazuhIntegrationConfig } from '../../config';
+import { IntegrationConfig } from '../../config';
 import { wazuhClient } from '../../wazuh/client';
 import { Entities, Steps } from '../constants';
 import { createManagerEntity } from './converter';
@@ -11,13 +11,13 @@ import { createManagerEntity } from './converter';
 export async function fetchManager({
   instance,
   jobState,
-}: IntegrationStepExecutionContext<WazuhIntegrationConfig>) {
+}: IntegrationStepExecutionContext<IntegrationConfig>) {
   await jobState.addEntity(
     createManagerEntity(instance.id, await wazuhClient.fetchManager()),
   );
 }
 
-export const managerSteps: IntegrationStep<WazuhIntegrationConfig>[] = [
+export const managerSteps: IntegrationStep<IntegrationConfig>[] = [
   {
     id: Steps.MANAGER,
     name: 'Fetch Manager',

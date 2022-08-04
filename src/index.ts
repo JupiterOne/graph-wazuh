@@ -2,11 +2,11 @@ import { IntegrationInvocationConfig } from '@jupiterone/integration-sdk-core';
 import { integrationSteps } from './steps';
 import {
   validateInvocation,
-  WazuhIntegrationConfig,
+  IntegrationConfig,
   instanceConfigFields,
 } from './config';
 
-export const invocationConfig: IntegrationInvocationConfig<WazuhIntegrationConfig> =
+export const invocationConfig: IntegrationInvocationConfig<IntegrationConfig> =
   {
     instanceConfigFields,
     validateInvocation,
