@@ -55,7 +55,7 @@ class WazuhClient {
       },
       agent,
     };
-    // https://documentation.wazuh.com/current/user-manual/api/reference.html#section/
+    // https://documentation.wazuh.com/current/user-manual/api/reference.html#section/Authentication
     // jwt expires every 900 seconds
     this.refreshAuthInterval = setInterval(async () => {
       await makeRequest(`${this.config.managerUrl}/security/config`, {
