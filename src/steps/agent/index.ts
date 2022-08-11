@@ -17,11 +17,14 @@ export async function fetchAgents({
   jobState,
   logger,
 }: IntegrationStepExecutionContext<IntegrationConfig>) {
-  const agents = await wazuhClient.fetchAgents();
-
-  for (const agent of agents) {
-    await jobState.addEntity(createAgentEntity(agent));
-  }
+  let nextOffset;
+  do {
+    const batch = await wazuhClient.fetchBatchOfAgents(nextOffset);
+    for (const agent of batch.agents) {
+      await jobState.addEntity(createAgentEntity(agent));
+    }
+    nextOffset = batch.next;
+  } while (nextOffset);
 }
 
 export async function buildManagerAgentRelationships({
