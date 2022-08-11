@@ -8,6 +8,10 @@ and this project adheres to
 
 ## [Unreleased]
 
+## Added
+
+- pagination support for agents
+
 ## 2.0.4 - 2022-08-04
 
 ## Fixed

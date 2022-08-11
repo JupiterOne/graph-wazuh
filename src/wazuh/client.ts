@@ -80,7 +80,8 @@ class WazuhClient {
   }
 
   public async fetchManager(): Promise<WazuhManager> {
-    const items = await this.fetchData<WazuhManager>('/manager/info');
+    const items = (await this.fetchData<WazuhManager>('/manager/info'))
+      .affected_items;
     if (items.length === 1) {
       return items[0];
     } else {
@@ -109,8 +110,36 @@ class WazuhClient {
     }
   }
 
-  public async fetchAgents(): Promise<WazuhAgent[]> {
-    return this.fetchData<WazuhAgent>('/agents');
+  /**
+   *
+   * @param offset // used for pagination
+   * @returns
+   * Promise<{
+   *  agents: WazuhAgent[],
+   *  next?: number // pass back into this function to fetch "next page"
+   * }>
+   */
+  public async fetchBatchOfAgents(
+    offset: number = 0,
+    limit: number = 500,
+  ): Promise<{
+    agents: WazuhAgent[];
+    next?: number;
+  }> {
+    const response = await this.fetchData<WazuhAgent>(
+      `/agents?offset=${offset}&limit=${limit}`,
+    );
+    const total = offset + response.affected_items.length;
+    if (total === response.total_affected_items) {
+      return {
+        agents: response.affected_items,
+      };
+    } else {
+      return {
+        agents: response.affected_items,
+        next: total,
+      };
+    }
   }
 
   private async fetchAuth(
@@ -123,7 +152,7 @@ class WazuhClient {
     return json.data;
   }
 
-  private async fetchData<T>(path: string): Promise<T[]> {
+  private async fetchData<T>(path: string): Promise<WazuhResponse<T>> {
     const json = await makeRequest(
       `${this.config.managerUrl}${path}`,
       this.requestOptions,
@@ -146,7 +175,7 @@ class WazuhClient {
         message: `Encountered error fetching data from Wazuh Api. We recieved the following message from the server: ${response.message}`,
       });
     }
-    return response.affected_items;
+    return response;
   }
 }
 
