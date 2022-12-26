@@ -190,13 +190,12 @@ class WazuhClient {
   }
 }
 
-async function makeRequest<T>(url: string, init?: RequestInit): Promise<any> {
+async function makeRequest(url: string, init?: RequestInit): Promise<Response> {
   try {
     // Handle rate-limiting
     const response = await retry(
       async () => {
         const res: Response = await fetch(url, init);
-
         if (res.status >= 400) {
           throw new IntegrationProviderAPIError({
             endpoint: url,
