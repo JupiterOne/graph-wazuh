@@ -59,7 +59,7 @@ class WazuhClient {
     this.refreshAuthInterval = setInterval(async () => {
       await makeRequest(`${this.config.managerUrl}/security/config`, {
         ...this.requestOptions,
-        method: 'POST',
+        method: 'PUT',
         body: JSON.stringify({
           auth_token_exp_timeout: 900,
         }),
