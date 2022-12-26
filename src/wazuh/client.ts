@@ -2,7 +2,7 @@ import {
   IntegrationLogger,
   IntegrationProviderAPIError,
 } from '@jupiterone/integration-sdk-core';
-import fetch, { RequestInit } from 'node-fetch';
+import fetch, { RequestInit, Response } from 'node-fetch';
 import * as https from 'https';
 import {
   WazuhAgent,
@@ -11,6 +11,7 @@ import {
   WazuhManager,
   WazuhResponse,
 } from './types';
+import { retry } from '@lifeomic/attempt';
 
 export type ResourceIteratee<T> = (each: T) => Promise<void> | void;
 
@@ -54,7 +55,6 @@ class WazuhClient {
       },
       agent,
     };
-
     // https://documentation.wazuh.com/current/user-manual/api/reference.html#section/Authentication
     // jwt expires every 900 seconds
     this.refreshAuthInterval = setInterval(async () => {
@@ -191,15 +191,41 @@ class WazuhClient {
 }
 
 async function makeRequest<T>(url: string, init?: RequestInit): Promise<any> {
-  const response = await fetch(url, init);
-  if (response.status >= 400) {
+  try {
+    // Handle rate-limiting
+    const response = await retry(
+      async () => {
+        const res: Response = await fetch(url, init);
+
+        if (res.status >= 400) {
+          throw new IntegrationProviderAPIError({
+            endpoint: url,
+            statusText: res.statusText,
+            status: res.status,
+          });
+        } else {
+          return res;
+        }
+      },
+      {
+        delay: 5000,
+        maxAttempts: 10,
+        handleError: (err, context) => {
+          if (
+            err.statusCode !== 429 ||
+            ([500, 502, 503].includes(err.statusCode) && context.attemptNum > 1)
+          )
+            context.abort();
+        },
+      },
+    );
+    return response.json();
+  } catch (err) {
     throw new IntegrationProviderAPIError({
       endpoint: url,
-      statusText: response.statusText,
-      status: response.status,
+      status: err.status,
+      statusText: err.statusText,
     });
-  } else {
-    return response.json();
   }
 }
 
