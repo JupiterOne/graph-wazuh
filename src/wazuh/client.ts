@@ -12,16 +12,15 @@ import {
   WazuhResponse,
 } from './types';
 
+export type ResourceIteratee<T> = (each: T) => Promise<void> | void;
+
 class WazuhClient {
   private requestOptions: RequestInit;
-
   private config: WazuhClientConfig;
-
   private refreshAuthInterval: NodeJS.Timer;
-
   private logger: IntegrationLogger;
-
   public initialized: boolean;
+  private pageSize = 1;
 
   constructor() {
     this.initialized = false;
@@ -76,7 +75,7 @@ class WazuhClient {
   }
 
   public async verifyAccess() {
-    return this.fetchData('/manager/info');
+    return this.fetchData('/');
   }
 
   public async fetchManager(): Promise<WazuhManager> {
@@ -111,35 +110,14 @@ class WazuhClient {
   }
 
   /**
+   * Iterates each agent in the provider.
    *
-   * @param offset // used for pagination
-   * @returns
-   * Promise<{
-   *  agents: WazuhAgent[],
-   *  next?: number // pass back into this function to fetch "next page"
-   * }>
+   * @param iteratee receives each resource to produce entities/relationships
    */
-  public async fetchBatchOfAgents(
-    offset: number = 0,
-    limit: number = 500,
-  ): Promise<{
-    agents: WazuhAgent[];
-    next?: number;
-  }> {
-    const response = await this.fetchData<WazuhAgent>(
-      `/agents?offset=${offset}&limit=${limit}`,
-    );
-    const total = offset + response.affected_items.length;
-    if (total === response.total_affected_items) {
-      return {
-        agents: response.affected_items,
-      };
-    } else {
-      return {
-        agents: response.affected_items,
-        next: total,
-      };
-    }
+  public async iterateAgents(
+    iteratee: ResourceIteratee<WazuhAgent>,
+  ): Promise<void> {
+    await this.paginatedRequest<WazuhAgent>(`/agents`, iteratee);
   }
 
   private async fetchAuth(
@@ -158,7 +136,7 @@ class WazuhClient {
       this.requestOptions,
     );
     const response: WazuhResponse<T> = json.data;
-    if (response.error || response.failed_items.length) {
+    if (response.error || response.failed_items?.length) {
       this.logger.error(
         {
           total_affected_items: response.total_affected_items,
@@ -176,6 +154,38 @@ class WazuhClient {
       });
     }
     return response;
+  }
+
+  private async paginatedRequest<T>(
+    uri: string,
+    iteratee: ResourceIteratee<T>,
+  ): Promise<void> {
+    try {
+      let offset: number = 0;
+      let nextUri:
+        | string
+        | null = `${uri}?limit=${this.pageSize}&offset=${offset}`;
+      do {
+        const response: WazuhResponse<T> = await this.fetchData<T>(
+          nextUri || uri,
+        );
+        offset += 1;
+        nextUri =
+          response.total_affected_items > this.pageSize * offset
+            ? `${uri}?limit=${this.pageSize}&offset=${offset}`
+            : null;
+        for (const item of response.affected_items) {
+          await iteratee(item as T);
+        }
+      } while (nextUri);
+    } catch (err) {
+      throw new IntegrationProviderAPIError({
+        cause: new Error(err.message),
+        endpoint: uri,
+        status: err.statusCode,
+        statusText: err.message,
+      });
+    }
   }
 }
 
