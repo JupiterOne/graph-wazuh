@@ -54,10 +54,11 @@ class WazuhClient {
       },
       agent,
     };
+
     // https://documentation.wazuh.com/current/user-manual/api/reference.html#section/Authentication
     // jwt expires every 900 seconds
     this.refreshAuthInterval = setInterval(async () => {
-      await makeVoidRequest(`${this.config.managerUrl}/security/config`, {
+      await makeRequest(`${this.config.managerUrl}/security/config`, {
         ...this.requestOptions,
         method: 'PUT',
         body: JSON.stringify({
@@ -199,20 +200,6 @@ async function makeRequest<T>(url: string, init?: RequestInit): Promise<any> {
     });
   } else {
     return response.json();
-  }
-}
-
-async function makeVoidRequest<T>(
-  url: string,
-  init?: RequestInit,
-): Promise<void> {
-  const response = await fetch(url, init);
-  if (response.status >= 400) {
-    throw new IntegrationProviderAPIError({
-      endpoint: url,
-      statusText: response.statusText,
-      status: response.status,
-    });
   }
 }
 
