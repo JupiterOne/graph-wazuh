@@ -57,17 +57,13 @@ class WazuhClient {
     // https://documentation.wazuh.com/current/user-manual/api/reference.html#section/Authentication
     // jwt expires every 900 seconds
     this.refreshAuthInterval = setInterval(async () => {
-      await makeRequest(
-        `${this.config.managerUrl}/security/config`,
-        {
-          ...this.requestOptions,
-          method: 'PUT',
-          body: JSON.stringify({
-            auth_token_exp_timeout: 900,
-          }),
-        },
-        true,
-      );
+      await makeVoidRequest(`${this.config.managerUrl}/security/config`, {
+        ...this.requestOptions,
+        method: 'PUT',
+        body: JSON.stringify({
+          auth_token_exp_timeout: 900,
+        }),
+      });
     }, 800000);
 
     this.initialized = true;
@@ -193,11 +189,7 @@ class WazuhClient {
   }
 }
 
-async function makeRequest<T>(
-  url: string,
-  init?: RequestInit,
-  ignoreResponse: boolean = false,
-): Promise<any> {
+async function makeRequest<T>(url: string, init?: RequestInit): Promise<any> {
   const response = await fetch(url, init);
   if (response.status >= 400) {
     throw new IntegrationProviderAPIError({
@@ -205,8 +197,22 @@ async function makeRequest<T>(
       statusText: response.statusText,
       status: response.status,
     });
-  } else if (!ignoreResponse) {
+  } else {
     return response.json();
+  }
+}
+
+async function makeVoidRequest<T>(
+  url: string,
+  init?: RequestInit,
+): Promise<void> {
+  const response = await fetch(url, init);
+  if (response.status >= 400) {
+    throw new IntegrationProviderAPIError({
+      endpoint: url,
+      statusText: response.statusText,
+      status: response.status,
+    });
   }
 }
 
