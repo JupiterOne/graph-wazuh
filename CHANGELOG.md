@@ -8,6 +8,10 @@ and this project adheres to
 
 ## [Unreleased]
 
+## Fixed
+
+- pagination in wazuh client
+
 ## 2.1.0 - 2022-08-11
 
 ## Added
