@@ -190,7 +190,7 @@ class WazuhClient {
   }
 }
 
-async function makeRequest(url: string, init?: RequestInit): Promise<Response> {
+async function makeRequest<T>(url: string, init?: RequestInit): Promise<T> {
   try {
     // Handle rate-limiting
     const response = await retry(
@@ -218,7 +218,7 @@ async function makeRequest(url: string, init?: RequestInit): Promise<Response> {
         },
       },
     );
-    return response.json();
+    return response.json() as T;
   } catch (err) {
     throw new IntegrationProviderAPIError({
       endpoint: url,
