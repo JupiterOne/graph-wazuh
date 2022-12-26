@@ -93,7 +93,11 @@ export function getWazuhMatchRequestsBy(
 ): MatchRequestsBy {
   return {
     headers: false,
-    url: true,
+    url: {
+      hostname: false,
+      port: false,
+      pathname: true,
+    },
     ...options,
   };
 }

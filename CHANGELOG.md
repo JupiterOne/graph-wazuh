@@ -8,6 +8,13 @@ and this project adheres to
 
 ## [Unreleased]
 
+## Fixed
+
+- fixed pagination of agents
+- pagination of agents moved from step level to client level
+- fixed auth token refresh bug
+- fixed checking of URL to ignore domain and port matching
+
 ## 2.1.0 - 2022-08-11
 
 ## Added
