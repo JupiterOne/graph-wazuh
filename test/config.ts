@@ -9,7 +9,7 @@ if (process.env.LOAD_ENV) {
 }
 
 export const config: IntegrationConfig = {
-  username: process.env.USERNAME || 'username',
+  username: process.env.USERID || 'username',
   password: process.env.PASSWORD || 'password',
-  managerUrl: process.env.MANAGER_URL || 'https://192.168.68.118:55000',
+  managerUrl: process.env.MANAGER_URL || 'https://10.55.123.46:55000',
 };

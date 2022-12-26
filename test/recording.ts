@@ -66,7 +66,7 @@ function redact(entry): void {
   keysToRedactMap.set('uname', DEFAULT_REDACT);
   keysToRedactMap.set('ip', DEFAULT_REDACT);
   keysToRedactMap.set('registerIP', DEFAULT_REDACT);
-  keysToRedactMap.set('token', DEFAULT_REDACT);
+  // keysToRedactMap.set('token', DEFAULT_REDACT);
   let response = JSON.parse(entry.response.content.text);
 
   if (response.forEach) {
@@ -93,7 +93,11 @@ export function getWazuhMatchRequestsBy(
 ): MatchRequestsBy {
   return {
     headers: false,
-    url: true,
+    url: {
+      hostname: false,
+      port: false,
+      pathname: true,
+    },
     ...options,
   };
 }

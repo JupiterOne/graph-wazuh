@@ -9,6 +9,7 @@ import {
   WazuhAuth,
   WazuhClientConfig,
   WazuhManager,
+  WazuhData,
   WazuhResponse,
 } from './types';
 import { retry } from '@lifeomic/attempt';
@@ -21,7 +22,7 @@ class WazuhClient {
   private refreshAuthInterval: NodeJS.Timer;
   private logger: IntegrationLogger;
   public initialized: boolean;
-  private pageSize = 1;
+  private pageSize = 1; // TODO: for testing purposes only; change to 500 before official PR
 
   constructor() {
     this.initialized = false;
@@ -123,20 +124,22 @@ class WazuhClient {
 
   private async fetchAuth(
     requestOptionsOverride: RequestInit,
-  ): Promise<WazuhAuth> {
-    const json = await makeRequest(
+  ): Promise<WazuhResponse<WazuhAuth>> {
+    const json: WazuhResponse<WazuhAuth> = await makeRequest(
       `${this.config.managerUrl}/security/user/authenticate`,
       requestOptionsOverride,
     );
-    return json.data;
+
+    console.log('fetchAuth res:', JSON.stringify(json));
+    return json;
   }
 
-  private async fetchData<T>(path: string): Promise<WazuhResponse<T>> {
+  private async fetchData<T>(path: string): Promise<WazuhData<T>> {
     const json = await makeRequest(
       `${this.config.managerUrl}${path}`,
       this.requestOptions,
     );
-    const response: WazuhResponse<T> = json.data;
+    const response: WazuhData<T> = json as WazuhData<T>;
     if (response.error || response.failed_items?.length) {
       this.logger.error(
         {
@@ -167,9 +170,7 @@ class WazuhClient {
         | string
         | null = `${uri}?limit=${this.pageSize}&offset=${offset}`;
       do {
-        const response: WazuhResponse<T> = await this.fetchData<T>(
-          nextUri || uri,
-        );
+        const response: WazuhData<T> = await this.fetchData<T>(nextUri || uri);
         offset += 1;
         nextUri =
           response.total_affected_items > this.pageSize * offset

@@ -49,11 +49,16 @@ export interface WazuhAgent {
   configSum?: string;
 }
 
-export interface WazuhResponse<T> {
+export interface WazuhData<T> {
   affected_items: T[];
   total_affected_items: number;
   total_failed_items: number;
   failed_items: any[];
   message: string;
   error: number;
+}
+
+export interface WazuhResponse<T> {
+  data: T;
+  error?: number;
 }
