@@ -23,7 +23,7 @@ class WazuhClient {
   private refreshAuthInterval: NodeJS.Timer;
   private logger: IntegrationLogger;
   public initialized: boolean;
-  private pageSize = 1; // TODO: for testing purposes only; change to 500 before official PR
+  private pageSize = 500;
 
   constructor() {
     this.initialized = false;
