@@ -6,10 +6,11 @@ import fetch, { RequestInit, Response } from 'node-fetch';
 import * as https from 'https';
 import {
   WazuhAgent,
+  WazuhAPIInfo,
   WazuhAuth,
   WazuhClientConfig,
   WazuhManager,
-  WazuhData,
+  WazuhPaginatedData,
   WazuhResponse,
 } from './types';
 import { retry } from '@lifeomic/attempt';
@@ -48,7 +49,7 @@ class WazuhClient {
       agent,
     };
     const authenticateResponse = await this.fetchAuth(basicRequestOptions);
-    const jwtToken = authenticateResponse?.data?.token;
+    const jwtToken = (authenticateResponse?.data as WazuhAuth).token;
     this.requestOptions = {
       headers: {
         'Content-Type': 'application/json',
@@ -77,15 +78,18 @@ class WazuhClient {
   }
 
   public async verifyAccess() {
-    return this.fetchData('/');
+    return await makeRequest<WazuhAPIInfo>(
+      `${this.config.managerUrl}/`,
+      this.requestOptions,
+    );
   }
 
   public async fetchManager(): Promise<WazuhManager> {
     const items = (
-      (await this.fetchData<WazuhManager>(
+      (await this.fetchPaginatedData<WazuhManager>(
         '/manager/info',
-      )) as unknown as WazuhResponse<WazuhData<WazuhManager>>
-    ).data?.affected_items;
+      )) as WazuhPaginatedData<WazuhManager>
+    ).affected_items;
     if (items.length === 1) {
       return items[0];
     } else {
@@ -135,12 +139,15 @@ class WazuhClient {
     return json;
   }
 
-  private async fetchData<T>(path: string): Promise<WazuhData<T>> {
-    const json = await makeRequest(
+  private async fetchPaginatedData<T>(
+    path: string,
+  ): Promise<WazuhPaginatedData<T>> {
+    const json = await makeRequest<WazuhResponse<WazuhPaginatedData<T>>>(
       `${this.config.managerUrl}${path}`,
       this.requestOptions,
     );
-    const response: WazuhData<T> = json as WazuhData<T>;
+    const response: WazuhPaginatedData<T> =
+      json.data as unknown as WazuhPaginatedData<T>;
     if (response.error || response.failed_items?.length) {
       this.logger.error(
         {
@@ -171,15 +178,15 @@ class WazuhClient {
         | string
         | null = `${uri}?limit=${this.pageSize}&offset=${offset}`;
       do {
-        const response = (await this.fetchData<T>(
+        const response = (await this.fetchPaginatedData<T>(
           nextUri || uri,
-        )) as unknown as WazuhResponse<WazuhData<T>>;
+        )) as WazuhPaginatedData<T>;
         offset += 1;
         nextUri =
-          response.data.total_affected_items > this.pageSize * offset
+          response.total_affected_items > this.pageSize * offset
             ? `${uri}?limit=${this.pageSize}&offset=${offset}`
             : null;
-        for (const item of response.data.affected_items) {
+        for (const item of response.affected_items) {
           await iteratee(item as T);
         }
       } while (nextUri);
