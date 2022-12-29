@@ -35,11 +35,17 @@ class WazuhClient {
     }
     this.config = config;
     this.logger = logger;
+    await this.setRequestOptions();
+
+    this.initialized = true;
+  }
+
+  private async setRequestOptions() {
     const basicAuthorization = Buffer.from(
-      `${config.username}:${config.password}`,
+      `${this.config.username}:${this.config.password}`,
     ).toString('base64');
     const agent = new https.Agent({
-      rejectUnauthorized: config.selfSignedCert ? false : true,
+      rejectUnauthorized: this.config.selfSignedCert ? false : true,
     });
     const basicRequestOptions: RequestInit = {
       headers: {
@@ -50,6 +56,7 @@ class WazuhClient {
     };
     const authenticateResponse = await this.fetchAuth(basicRequestOptions);
     const jwtToken = (authenticateResponse?.data as WazuhAuth).token;
+
     this.requestOptions = {
       headers: {
         'Content-Type': 'application/json',
@@ -57,19 +64,6 @@ class WazuhClient {
       },
       agent,
     };
-    // https://documentation.wazuh.com/current/user-manual/api/reference.html#section/Authentication
-    // jwt expires every 900 seconds
-    this.refreshAuthInterval = setInterval(async () => {
-      await makeRequest(`${this.config.managerUrl}/security/config`, {
-        ...this.requestOptions,
-        method: 'PUT',
-        body: JSON.stringify({
-          auth_token_exp_timeout: 900,
-        }),
-      });
-    }, 800000);
-
-    this.initialized = true;
   }
 
   public destroy() {
@@ -78,7 +72,7 @@ class WazuhClient {
   }
 
   public async verifyAccess() {
-    return await makeRequest<WazuhAPIInfo>(
+    return await this.makeRequest<WazuhAPIInfo>(
       `${this.config.managerUrl}/`,
       this.requestOptions,
     );
@@ -132,7 +126,7 @@ class WazuhClient {
   private async fetchAuth(
     requestOptionsOverride: RequestInit,
   ): Promise<WazuhResponse<WazuhAuth>> {
-    const json: WazuhResponse<WazuhAuth> = await makeRequest(
+    const json: WazuhResponse<WazuhAuth> = await this.makeRequest(
       `${this.config.managerUrl}/security/user/authenticate`,
       requestOptionsOverride,
     );
@@ -142,7 +136,7 @@ class WazuhClient {
   private async fetchPaginatedData<T>(
     path: string,
   ): Promise<WazuhPaginatedData<T>> {
-    const json = await makeRequest<WazuhResponse<WazuhPaginatedData<T>>>(
+    const json = await this.makeRequest<WazuhResponse<WazuhPaginatedData<T>>>(
       `${this.config.managerUrl}${path}`,
       this.requestOptions,
     );
@@ -199,43 +193,47 @@ class WazuhClient {
       });
     }
   }
-}
 
-async function makeRequest<T>(url: string, init?: RequestInit): Promise<T> {
-  try {
-    // Handle rate-limiting
-    const response = await retry(
-      async () => {
-        const res: Response = await fetch(url, init);
-        if (res.status >= 400) {
-          throw new IntegrationProviderAPIError({
-            endpoint: url,
-            statusText: res.statusText,
-            status: res.status,
-          });
-        } else {
-          return res;
-        }
-      },
-      {
-        delay: 5000,
-        maxAttempts: 10,
-        handleError: (err, context) => {
-          if (
-            err.statusCode !== 429 ||
-            ([500, 502, 503].includes(err.statusCode) && context.attemptNum > 1)
-          )
-            context.abort();
+  private async makeRequest<T>(url: string, init?: RequestInit): Promise<T> {
+    try {
+      // Handle rate-limiting
+      const response = await retry(
+        async () => {
+          const res: Response = await fetch(url, init);
+          if (res.status >= 400) {
+            throw new IntegrationProviderAPIError({
+              endpoint: url,
+              statusText: res.statusText,
+              status: res.status,
+            });
+          } else {
+            return res;
+          }
         },
-      },
-    );
-    return response.json() as unknown as T;
-  } catch (err) {
-    throw new IntegrationProviderAPIError({
-      endpoint: url,
-      status: err.status,
-      statusText: err.statusText,
-    });
+        {
+          delay: 5000,
+          maxAttempts: 10,
+          handleError: async (err, context) => {
+            if (err.statusCode === 401) {
+              await this.setRequestOptions();
+            } else if (
+              err.statusCode !== 429 ||
+              ([500, 502, 503].includes(err.statusCode) &&
+                context.attemptNum > 1)
+            ) {
+              context.abort();
+            }
+          },
+        },
+      );
+      return response.json() as unknown as T;
+    } catch (err) {
+      throw new IntegrationProviderAPIError({
+        endpoint: url,
+        status: err.status,
+        statusText: err.statusText,
+      });
+    }
   }
 }
 
