@@ -48,7 +48,7 @@ class WazuhClient {
       agent,
     };
     const authenticateResponse = await this.fetchAuth(basicRequestOptions);
-    const jwtToken = authenticateResponse?.token;
+    const jwtToken = authenticateResponse?.data?.token;
     this.requestOptions = {
       headers: {
         'Content-Type': 'application/json',
@@ -81,8 +81,11 @@ class WazuhClient {
   }
 
   public async fetchManager(): Promise<WazuhManager> {
-    const items = (await this.fetchData<WazuhManager>('/manager/info'))
-      .affected_items;
+    const items = (
+      (await this.fetchData<WazuhManager>(
+        '/manager/info',
+      )) as unknown as WazuhResponse<WazuhData<WazuhManager>>
+    ).data?.affected_items;
     if (items.length === 1) {
       return items[0];
     } else {
@@ -129,8 +132,6 @@ class WazuhClient {
       `${this.config.managerUrl}/security/user/authenticate`,
       requestOptionsOverride,
     );
-
-    console.log('fetchAuth res:', JSON.stringify(json));
     return json;
   }
 
@@ -170,13 +171,15 @@ class WazuhClient {
         | string
         | null = `${uri}?limit=${this.pageSize}&offset=${offset}`;
       do {
-        const response: WazuhData<T> = await this.fetchData<T>(nextUri || uri);
+        const response = (await this.fetchData<T>(
+          nextUri || uri,
+        )) as unknown as WazuhResponse<WazuhData<T>>;
         offset += 1;
         nextUri =
-          response.total_affected_items > this.pageSize * offset
+          response.data.total_affected_items > this.pageSize * offset
             ? `${uri}?limit=${this.pageSize}&offset=${offset}`
             : null;
-        for (const item of response.affected_items) {
+        for (const item of response.data.affected_items) {
           await iteratee(item as T);
         }
       } while (nextUri);
@@ -219,7 +222,7 @@ async function makeRequest<T>(url: string, init?: RequestInit): Promise<T> {
         },
       },
     );
-    return response.json() as T;
+    return response.json() as unknown as T;
   } catch (err) {
     throw new IntegrationProviderAPIError({
       endpoint: url,
