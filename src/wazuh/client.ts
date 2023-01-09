@@ -16,14 +16,13 @@ import {
 import { retry } from '@lifeomic/attempt';
 
 export type ResourceIteratee<T> = (each: T) => Promise<void> | void;
+const PAGE_SIZE = 500;
 
 class WazuhClient {
   private requestOptions: RequestInit;
   private config: WazuhClientConfig;
-  private refreshAuthInterval: NodeJS.Timer;
   private logger: IntegrationLogger;
   public initialized: boolean;
-  private pageSize = 500;
 
   constructor() {
     this.initialized = false;
@@ -67,7 +66,6 @@ class WazuhClient {
   }
 
   public destroy() {
-    clearInterval(this.refreshAuthInterval);
     this.initialized = false;
   }
 
@@ -168,17 +166,15 @@ class WazuhClient {
   ): Promise<void> {
     try {
       let offset: number = 0;
-      let nextUri:
-        | string
-        | null = `${uri}?limit=${this.pageSize}&offset=${offset}`;
+      let nextUri: string | null = `${uri}?limit=${PAGE_SIZE}&offset=${offset}`;
       do {
         const response = (await this.fetchPaginatedData<T>(
           nextUri || uri,
         )) as WazuhPaginatedData<T>;
         offset += 1;
         nextUri =
-          response.total_affected_items > this.pageSize * offset
-            ? `${uri}?limit=${this.pageSize}&offset=${offset}`
+          response.total_affected_items > PAGE_SIZE * offset
+            ? `${uri}?limit=${PAGE_SIZE}&offset=${offset}`
             : null;
         for (const item of response.affected_items) {
           await iteratee(item as T);
@@ -214,6 +210,8 @@ class WazuhClient {
           delay: 5000,
           maxAttempts: 10,
           handleError: async (err, context) => {
+            // jwt expires every 900 seconds
+            // reset jwt if HTTP 401 is encountered
             if (err.statusCode === 401) {
               await this.setRequestOptions();
             } else if (
