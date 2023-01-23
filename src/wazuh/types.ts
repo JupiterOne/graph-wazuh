@@ -49,11 +49,26 @@ export interface WazuhAgent {
   configSum?: string;
 }
 
-export interface WazuhResponse<T> {
+export interface WazuhPaginatedData<T> {
   affected_items: T[];
   total_affected_items: number;
   total_failed_items: number;
   failed_items: any[];
   message: string;
   error: number;
+}
+
+export interface WazuhAPIInfo {
+  title: string;
+  api_version: string;
+  revision: string;
+  license_name: string;
+  license_url: string;
+  hostname: string;
+  timestamp: string;
+}
+
+export interface WazuhResponse<T> {
+  data: WazuhAuth | WazuhPaginatedData<T> | WazuhAPIInfo;
+  error?: number;
 }

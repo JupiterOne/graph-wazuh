@@ -13,18 +13,11 @@ import { buildManagerEntityKey } from '../manager/converter';
 import { createAgentEntity } from './converter';
 
 export async function fetchAgents({
-  instance,
   jobState,
-  logger,
 }: IntegrationStepExecutionContext<IntegrationConfig>) {
-  let nextOffset;
-  do {
-    const batch = await wazuhClient.fetchBatchOfAgents(nextOffset);
-    for (const agent of batch.agents) {
-      await jobState.addEntity(createAgentEntity(agent));
-    }
-    nextOffset = batch.next;
-  } while (nextOffset);
+  await wazuhClient.iterateAgents(async (agent) => {
+    await jobState.addEntity(createAgentEntity(agent));
+  });
 }
 
 export async function buildManagerAgentRelationships({
