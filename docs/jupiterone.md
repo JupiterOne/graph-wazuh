@@ -39,10 +39,14 @@ and a username and password to JupiterOne.
 
 If you are using Wazuh Cloud, contact Wazuh Support to make changes to your Wazuh 
 Cloud account to expose the API. In addition, provide Wazuh Support the following
-J1 IP addresses that you must add to the allowlist. After you have done this, the 
-J1 integration can connect to your Wazuh Cloud instance. Be sure to structure 
-your MANAGER_URL in the J1 integration configuration to be in the following 
-format: https://${wauzhCloudEnvId}.cloud.wazuh.com/api/wazuh.
+J1 IP addresses that you must add to the allowlist:
+- 18.219.33.157
+- 18.218.86.86
+- 52.14.136.234
+
+After you have done this, the J1 integration can connect to your Wazuh Cloud instance. 
+Be sure to structure your MANAGER_URL in the J1 integration configuration to be in the 
+following format: https://${wauzhCloudEnvId}.cloud.wazuh.com/api/wazuh.
 
 ### In JupiterOne
 
