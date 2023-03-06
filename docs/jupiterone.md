@@ -1,4 +1,4 @@
-# Wazuh Integration with JupiterOne
+# Wazuh
 
 ## Wazuh + JupiterOne Integration Benefits
 
@@ -35,9 +35,20 @@ connects directly to Wazah Manager APIs to obtain agent information. Customers
 authorize access to their self-hosted servers by providing the manager base URL
 and a username and password to JupiterOne.
 
+### In Wazuh Cloud
+
+If you are using Wazuh Cloud, contact J1 Support to obtain a list of IPs for
+Wazuh to whitelist. After you get the IP list, contact Wazuh Support to make
+changes to your Wazuh Cloud account to expose the API.
+
+After you have done this, the J1 integration can connect to your Wazuh Cloud
+instance. Be sure to structure your MANAGER_URL in the J1 integration
+configuration to be in the following format:
+`https://${wauzhCloudEnvId}.cloud.wazuh.com/api/wazuh`
+
 ### In JupiterOne
 
-1. From the configuration **Gear Icon**, select **Integrations**.
+1. From the top navigation of the J1 Search homepage, select **Integrations**.
 2. Scroll to the **Wazuh** integration tile and click it.
 3. Click the **Add Configuration** button and configure the following settings:
 
@@ -56,7 +67,7 @@ and a username and password to JupiterOne.
 
 ## How to Uninstall
 
-1. From the configuration **Gear Icon**, select **Integrations**.
+1. From the top navigation of the J1 Search homepage, select **Integrations**.
 2. Scroll to the **Wazuh** integration tile and click it.
 3. Identify and click the **integration to delete**.
 4. Click the **trash can** icon.
